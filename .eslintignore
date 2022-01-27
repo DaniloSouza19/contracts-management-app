@@ -1,3 +1,4 @@
 node_modules
 *.css
 *.scv
+vite.config.ts
