@@ -1,0 +1,21 @@
+.container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div.text-input {
+  margin-bottom: 0.75rem;
+}
+
+div .login-image {
+  margin-right: 0.75rem;
+}
+
+div.form-title {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
