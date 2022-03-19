@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
   Button,
   TextField,
@@ -6,7 +7,8 @@ import {
   Container,
 } from '@mui/material';
 import { Login } from '@mui/icons-material';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
+import { useAuth } from '../hooks/auth';
 import './SingIn.css';
 
 interface Inputs {
@@ -21,14 +23,29 @@ export function SignIn() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit: SubmitHandler<Inputs> = (data: Inputs) => {
-    console.log(data);
-  };
+  const { signIn } = useAuth();
+
+  const onSubmit: SubmitHandler<Inputs> = useCallback(
+    async ({ email, password }: Inputs) => {
+      try {
+        await signIn({
+          email,
+          password,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    []
+  );
 
   return (
     <Container className="container" component="main" maxWidth="xs">
       <CssBaseline />
-      <form className="sign-form" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="sign-form"
+        onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)}
+      >
         <div className="form-title">
           <Login className="login-image" color="primary" />
           <Typography variant="h5">Login</Typography>
