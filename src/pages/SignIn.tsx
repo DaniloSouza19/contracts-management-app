@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Login } from '@mui/icons-material';
 import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/auth';
 import './SingIn.css';
 
@@ -25,6 +26,9 @@ export function SignIn() {
 
   const { signIn } = useAuth();
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password }: Inputs) => {
       try {
@@ -32,6 +36,8 @@ export function SignIn() {
           email,
           password,
         });
+
+        navigate(`/${location.search}`);
       } catch (error) {
         console.log(error);
       }
