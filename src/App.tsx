@@ -1,11 +1,11 @@
 import { StyledEngineProvider } from '@mui/material/styles';
-import { SignIn } from './pages/SignIn';
+import { Router } from './Router';
 
 export function App() {
   return (
     <div className="App">
       <StyledEngineProvider injectFirst>
-        <SignIn />
+        <Router />
       </StyledEngineProvider>
     </div>
   );
