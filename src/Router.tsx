@@ -9,6 +9,7 @@ import { useAuth } from './hooks/auth';
 import { Dashboard } from './pages/Dashboard';
 import { Accounts } from './pages/Accounts';
 import { SignIn } from './pages/SignIn';
+import { Properties } from './pages/Properties';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
@@ -30,6 +31,14 @@ export function Router() {
           element={
             <RequireAuth>
               <Dashboard />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/properties"
+          element={
+            <RequireAuth>
+              <Properties />
             </RequireAuth>
           }
         />
