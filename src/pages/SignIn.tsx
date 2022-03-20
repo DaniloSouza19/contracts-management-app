@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../hooks/auth';
 import Copyright from '../components/copyright';
-import { useMessage } from '../hooks/Message';
+import { useMessage } from '../hooks/message';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
