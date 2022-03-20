@@ -5,8 +5,8 @@ import {
   Typography,
   CssBaseline,
   Container,
-} from '@mui/material';
-import { Login } from '@mui/icons-material';
+} from '@material-ui/core';
+import { Person } from '@material-ui/icons';
 import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth';
@@ -64,7 +64,7 @@ export function SignIn() {
         onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)}
       >
         <div className={styles.formTitle}>
-          <Login className="login-image" color="primary" />
+          <Person className="login-image" color="primary" />
           <Typography variant="h5">Login</Typography>
         </div>
         <TextField

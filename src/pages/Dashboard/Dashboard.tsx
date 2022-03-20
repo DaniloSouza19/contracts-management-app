@@ -1,4 +1,4 @@
-import { Button, Container } from '@mui/material';
+import { Button, Container } from '@material-ui/core';
 import { useAuth } from '../../hooks/auth';
 
 export function Dashboard() {
