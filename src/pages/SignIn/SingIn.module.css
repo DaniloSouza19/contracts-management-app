@@ -5,15 +5,15 @@
   justify-content: center;
 }
 
-div.text-input {
+div.textInput {
   margin-bottom: 0.75rem;
 }
 
-div .login-image {
+div .loginImage {
   margin-right: 0.75rem;
 }
 
-div.form-title {
+div.formTitle {
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;

@@ -9,10 +9,10 @@ import {
 import { Login } from '@mui/icons-material';
 import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/auth';
-import { useMessage } from '../hooks/Message';
+import { useAuth } from '../../hooks/auth';
+import { useMessage } from '../../hooks/Message';
 
-import './SingIn.css';
+import styles from './SingIn.module.css';
 
 interface Inputs {
   email: string;
@@ -57,18 +57,18 @@ export function SignIn() {
   );
 
   return (
-    <Container className="container" component="main" maxWidth="xs">
+    <Container className={styles.container} component="main" maxWidth="xs">
       <CssBaseline />
       <form
-        className="sign-form"
+        className={styles.signForm}
         onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)}
       >
-        <div className="form-title">
+        <div className={styles.formTitle}>
           <Login className="login-image" color="primary" />
           <Typography variant="h5">Login</Typography>
         </div>
         <TextField
-          className="text-input"
+          className={styles.textInput}
           variant="outlined"
           label="E-mail"
           placeholder="E-mail"
@@ -81,7 +81,7 @@ export function SignIn() {
           {...register('email', { required: true })}
         />
         <TextField
-          className="text-input"
+          className={styles.textInput}
           variant="outlined"
           label="Password"
           placeholder="Password"
@@ -94,7 +94,7 @@ export function SignIn() {
           {...register('password', { required: true })}
         />
         <Button
-          className="form-button"
+          className={styles.formButton}
           type="submit"
           variant="contained"
           fullWidth

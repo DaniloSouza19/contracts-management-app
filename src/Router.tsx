@@ -6,8 +6,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { useAuth } from './hooks/auth';
-import { Dashboard } from './pages/Dashboard';
-import { SignIn } from './pages/SignIn';
+import { Dashboard } from './pages/Dashboard/Dashboard';
+import { SignIn } from './pages/SignIn/SignIn';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
