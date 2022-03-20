@@ -1,11 +1,10 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import { AlertColor } from '@mui/material';
 import { FeedbackMessage } from '../components/FeedbackMessage';
 
 interface MessageData {
   message: string;
   isOpen: boolean;
-  severity: AlertColor;
+  severity: 'success' | 'info' | 'error';
 }
 
 interface MessageContextData {

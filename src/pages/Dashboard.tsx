@@ -1,5 +1,5 @@
 import { Button, Container } from '@material-ui/core';
-import { useAuth } from '../../hooks/auth';
+import { useAuth } from '../hooks/auth';
 
 export function Dashboard() {
   const { signOut } = useAuth();
