@@ -10,6 +10,8 @@ import { Login } from '@mui/icons-material';
 import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/auth';
+import { useMessage } from '../hooks/Message';
+
 import './SingIn.css';
 
 interface Inputs {
@@ -25,6 +27,7 @@ export function SignIn() {
   } = useForm();
 
   const { signIn } = useAuth();
+  const { addMessage } = useMessage();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,9 +40,17 @@ export function SignIn() {
           password,
         });
 
+        addMessage({
+          message: 'Login com sucesso!',
+          severity: 'success',
+        });
+
         navigate(`/${location.search}`);
       } catch (error) {
-        console.log(error);
+        addMessage({
+          message: 'Erro ao tentar logar! Cheque as credenciais',
+          severity: 'error',
+        });
       }
     },
     []
