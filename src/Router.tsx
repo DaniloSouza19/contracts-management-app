@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import { useAuth } from './hooks/auth';
 import { Dashboard } from './pages/Dashboard';
+import { Accounts } from './pages/Accounts';
 import { SignIn } from './pages/SignIn';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -29,6 +30,14 @@ export function Router() {
           element={
             <RequireAuth>
               <Dashboard />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <RequireAuth>
+              <Accounts />
             </RequireAuth>
           }
         />
