@@ -131,8 +131,8 @@ export const Dashboard: React.FC = () => {
                   <Paper className={fixedHeightPaper}>
                     {' '}
                     <Typography variant="h6">
-                      Olá {user.name}, Seja bem vindo(a) ao App de sugestão de
-                      compras
+                      Olá {user.name}, Seja bem vindo(a) ao App de gestão de
+                      contratos de imóveis
                     </Typography>
                   </Paper>
                 </Grid>
@@ -150,9 +150,7 @@ export const Dashboard: React.FC = () => {
                       }}
                     >
                       <div>
-                        <Typography variant="h6">
-                          Minhas Sugestões ainda não autorizadas
-                        </Typography>
+                        <Typography variant="h6">Contratos ativos</Typography>
                       </div>
                       <div>
                         <Typography variant="h4">{orders.length}</Typography>

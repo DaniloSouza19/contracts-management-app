@@ -1,14 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
+import {
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+} from '@material-ui/core';
 import DashboardIcon from '@material-ui/icons/Dashboard';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import PersonIcon from '@material-ui/icons/Person';
+import HouseIcon from '@material-ui/icons/House';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 
 export const MainListItems: React.FC = () => {
   return (
@@ -28,7 +31,7 @@ export const MainListItems: React.FC = () => {
         </ListItem>
       </Link>
       <Link
-        to="/orders-suggested"
+        to="/properties"
         style={{
           textDecoration: 'none',
           color: 'inherit',
@@ -36,13 +39,13 @@ export const MainListItems: React.FC = () => {
       >
         <ListItem button>
           <ListItemIcon>
-            <AddShoppingCartIcon />
+            <HouseIcon />
           </ListItemIcon>
-          <ListItemText primary="Nova Sugestão" />
+          <ListItemText primary="Imóveis" />
         </ListItem>
       </Link>
       <Link
-        to="/my-orders"
+        to="/contracts"
         style={{
           textDecoration: 'none',
           color: 'inherit',
@@ -50,9 +53,23 @@ export const MainListItems: React.FC = () => {
       >
         <ListItem button>
           <ListItemIcon>
-            <ShoppingCartIcon />
+            <ReceiptIcon />
           </ListItemIcon>
-          <ListItemText primary="Minhas Sugestões" />
+          <ListItemText primary="Contratos" />
+        </ListItem>
+      </Link>
+      <Link
+        to="/payments"
+        style={{
+          textDecoration: 'none',
+          color: 'inherit',
+        }}
+      >
+        <ListItem button>
+          <ListItemIcon>
+            <MonetizationOnIcon />
+          </ListItemIcon>
+          <ListItemText primary="Pagamentos" />
         </ListItem>
       </Link>
       <Link
