@@ -11,6 +11,10 @@ import {
   Button,
   Modal,
   TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from '@material-ui/core';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -100,14 +104,35 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
   },
+  select: {
+    height: '100%',
+    width: '100%',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
 }));
 
 interface CreatePropertyFormData {
   description: string;
+  iptu_id: number;
+  registry_office: string;
+  registration_id: number;
+  measure_type: 'm2' | 'aq';
+  measure_amount: number;
 }
 
 const schemaValidation = Yup.object({
   description: Yup.string().required('Descrição obrigatória'),
+  iptu_id: Yup.number().required('IPTU obrigatório'),
+  registry_office: Yup.string().required('Cartório obrigatório'),
+  registration_id: Yup.number().required('Número de registro obrigatório'),
+  measure_type: Yup.string().required('Tipo de medida obrigatória'),
+  measure_amount: Yup.number().required('Valor de medida obrigatório'),
 });
 
 export const Properties: React.FC = () => {
@@ -126,23 +151,25 @@ export const Properties: React.FC = () => {
     resolver: yupResolver(schemaValidation),
   });
 
-  const onSubmit = useCallback(
-    async ({ description }: CreatePropertyFormData) => {
-      try {
-        setIsLoading(true);
+  const onSubmit = useCallback(async (data: CreatePropertyFormData) => {
+    try {
+      setIsLoading(true);
 
-        console.log(description);
-      } catch (error: any) {
-        addMessage({
-          message: 'Verifique os dados',
-          severity: 'error',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+      console.log(data);
+
+      addMessage({
+        message: 'Imóvel cadastrado com sucesso!',
+        severity: 'success',
+      });
+    } catch (error: any) {
+      addMessage({
+        message: 'Verifique os dados',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -185,6 +212,7 @@ export const Properties: React.FC = () => {
               </Grid>
             </Grid>
 
+            {/* Modal de cadastro de imóvel */}
             <Modal
               aria-labelledby="transition-modal-title"
               aria-describedby="transition-modal-description"
@@ -216,6 +244,95 @@ export const Properties: React.FC = () => {
                     <Typography variant="inherit" color="secondary">
                       {errors.description?.message}
                     </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="normal"
+                      id="iptu_id"
+                      {...register('iptu_id')}
+                      error={!!errors.iptu_id}
+                      label="IPTU"
+                      required
+                      autoFocus
+                      type="number"
+                    />
+
+                    <Typography variant="inherit" color="secondary">
+                      {errors.iptu_id?.message}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="normal"
+                      id="registry_office"
+                      {...register('registry_office')}
+                      error={!!errors.registry_office}
+                      label="Cartório de Registro"
+                      required
+                      autoFocus
+                    />
+
+                    <Typography variant="inherit" color="secondary">
+                      {errors.registry_office?.message}
+                    </Typography>
+
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="normal"
+                      id="registration_id"
+                      {...register('registration_id')}
+                      error={!!errors.registration_id}
+                      label="Número de Registro"
+                      required
+                      autoFocus
+                      type="number"
+                    />
+
+                    <Typography variant="inherit" color="secondary">
+                      {errors.registration_id?.message}
+                    </Typography>
+
+                    <Grid container>
+                      <Grid item>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="measure_amount"
+                          {...register('measure_amount')}
+                          error={!!errors.measure_amount}
+                          label="Medida"
+                          required
+                          autoFocus
+                          type="number"
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.measure_amount?.message}
+                        </Typography>
+                      </Grid>
+
+                      <Grid item>
+                        <FormControl className={classes.formControl}>
+                          <InputLabel id="demo-simple-select-label">
+                            Tipo de medida
+                          </InputLabel>
+                          <Select
+                            label="asdv"
+                            className={classes.select}
+                            labelId="demo-simple-select-label"
+                            id="measure_type"
+                            {...register('measure_type')}
+                            defaultValue="m2"
+                          >
+                            <MenuItem value="m2">m&sup2;</MenuItem>
+                            <MenuItem value="aq">alqueire</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+
                     <Button
                       fullWidth
                       variant="contained"
