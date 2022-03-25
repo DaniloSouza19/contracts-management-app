@@ -304,7 +304,7 @@ export const Properties: React.FC = () => {
                     />
 
                     <Typography variant="inherit" color="secondary">
-                      {errors.iptu_id?.message}
+                      {errors.iptu_id && 'IPTU é obrigatório'}
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={7}>
@@ -339,7 +339,8 @@ export const Properties: React.FC = () => {
                         />
 
                         <Typography variant="inherit" color="secondary">
-                          {errors.registration_id?.message}
+                          {errors.registration_id &&
+                            'Número de Registro É obrigatório'}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -360,7 +361,7 @@ export const Properties: React.FC = () => {
                         />
 
                         <Typography variant="inherit" color="secondary">
-                          {errors.measure_amount?.message}
+                          {errors.measure_amount && 'Medida é obrigatória'}
                         </Typography>
                       </Grid>
 
@@ -403,7 +404,7 @@ export const Properties: React.FC = () => {
                           autoFocus
                         />
                         <Typography variant="inherit" color="secondary">
-                          {errors.postal_code?.message}
+                          {errors.postal_code && 'CEP é obrigatório'}
                         </Typography>
                       </Grid>
                       <Grid item xs={8}>
@@ -479,14 +480,16 @@ export const Properties: React.FC = () => {
                       {errors.neighborhood?.message}
                     </Typography>
 
-                    <Typography variant="inherit" color="primary">
-                      Proprietário
-                    </Typography>
-                    <Divider title="Proprietário" />
-                    <Grid>
-                      <Button type="button" onClick={handleOpenPersonModal}>
-                        Cadastrar Proprietário
-                      </Button>
+                    <Grid container>
+                      <Grid item>
+                        <Typography variant="inherit" color="primary">
+                          Proprietário
+                        </Typography>
+                        <Divider title="Proprietário" />
+                        <Button type="button" onClick={handleOpenPersonModal}>
+                          Cadastrar Proprietário
+                        </Button>
+                      </Grid>
                     </Grid>
 
                     <Button
@@ -528,7 +531,9 @@ export const Properties: React.FC = () => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <h2 id="transition-modal-title">Nova Pessoa</h2>
+                    <h2 id="transition-modal-title">
+                      Cadastro de proprietário
+                    </h2>
                     <Button
                       type="button"
                       style={{
