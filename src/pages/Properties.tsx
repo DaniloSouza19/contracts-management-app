@@ -17,6 +17,7 @@ import {
   FormControl,
 } from '@material-ui/core';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import CloseIcon from '@material-ui/icons/Close';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import { useForm } from 'react-hook-form';
@@ -227,7 +228,23 @@ export const Properties: React.FC = () => {
             >
               <Fade in={openModal}>
                 <div className={classes.modalPaper}>
-                  <h2 id="transition-modal-title">Novo imóvel</h2>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <h2 id="transition-modal-title">Novo imóvel</h2>
+                    <Button
+                      type="button"
+                      style={{
+                        borderRadius: '50%',
+                      }}
+                      onClick={handleCloseModal}
+                    >
+                      <CloseIcon id="transition-modal-title" />
+                    </Button>
+                  </div>
                   <form onSubmit={handleSubmit(onSubmit)}>
                     <TextField
                       fullWidth
