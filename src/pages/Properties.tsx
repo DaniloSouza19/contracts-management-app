@@ -17,7 +17,9 @@ import {
   FormControl,
   Divider,
 } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CloseIcon from '@material-ui/icons/Close';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
@@ -135,6 +137,13 @@ interface CreatePropertyFormData {
   state: string;
   city: string;
   neighborhood: string;
+
+  owner_id: string;
+}
+
+interface IOwnerOptions {
+  id: string;
+  name: string;
 }
 
 const schemaValidation = Yup.object({
@@ -150,6 +159,8 @@ const schemaValidation = Yup.object({
   state: Yup.string().required('Estado obrigatório'),
   city: Yup.string().required('Cidade obrigatória'),
   neighborhood: Yup.string().required('Bairro obrigatória'),
+
+  owner_id: Yup.string().uuid().required('Proprietário é obrigatório'),
 });
 
 export const Properties: React.FC = () => {
@@ -158,6 +169,12 @@ export const Properties: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = React.useState(false);
   const [openPersonModal, setOpenPersonModal] = React.useState(false);
+  const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([
+    {
+      id: 'b22918de-3e09-49c4-a304-83f5056f55fe',
+      name: 'John Doe',
+    },
+  ]);
 
   const { addMessage } = useMessage();
 
@@ -480,14 +497,48 @@ export const Properties: React.FC = () => {
                       {errors.neighborhood?.message}
                     </Typography>
 
-                    <Grid container>
-                      <Grid item>
-                        <Typography variant="inherit" color="primary">
-                          Proprietário
+                    <br />
+
+                    <Typography variant="inherit" color="primary">
+                      Proprietário
+                    </Typography>
+
+                    <Divider title="Proprietário" />
+
+                    <Grid
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                      alignItems="center"
+                    >
+                      <Grid item xs={10}>
+                        <Autocomplete
+                          options={ownerOptions}
+                          getOptionLabel={(option) => option.id}
+                          renderOption={(option) => option.name}
+                          fullWidth
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              fullWidth
+                              variant="outlined"
+                              margin="normal"
+                              id="owner_id"
+                              {...register('owner_id')}
+                              error={!!errors.owner_id}
+                              label="Proprietário"
+                              required
+                              autoFocus
+                            />
+                          )}
+                        />
+                        <Typography variant="inherit" color="secondary">
+                          {errors.owner_id?.message}
                         </Typography>
-                        <Divider title="Proprietário" />
+                      </Grid>
+                      <Grid item xs={2}>
                         <Button type="button" onClick={handleOpenPersonModal}>
-                          Cadastrar Proprietário
+                          <AddCircleIcon fontSize="large" htmlColor="green" />
                         </Button>
                       </Grid>
                     </Grid>
