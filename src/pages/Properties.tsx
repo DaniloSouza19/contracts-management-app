@@ -15,6 +15,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Divider,
 } from '@material-ui/core';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import CloseIcon from '@material-ui/icons/Close';
@@ -26,6 +27,7 @@ import * as Yup from 'yup';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useMessage } from '../hooks/message';
+import { CreatePersonForm } from '../components/CreatePersonForm';
 
 const drawerWidth = 240;
 
@@ -99,7 +101,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   modalPaper: {
-    width: 500,
+    maxHeight: '90%',
+    maxWidth: 800,
+    overflow: 'scroll',
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
@@ -125,6 +129,12 @@ interface CreatePropertyFormData {
   registration_id: number;
   measure_type: 'm2' | 'aq';
   measure_amount: number;
+
+  street: string;
+  postal_code: number;
+  state: string;
+  city: string;
+  neighborhood: string;
 }
 
 const schemaValidation = Yup.object({
@@ -134,6 +144,12 @@ const schemaValidation = Yup.object({
   registration_id: Yup.number().required('Número de registro obrigatório'),
   measure_type: Yup.string().required('Tipo de medida obrigatória'),
   measure_amount: Yup.number().required('Valor de medida obrigatório'),
+
+  street: Yup.string().required('Rua obrigatória'),
+  postal_code: Yup.number().required('CEP obrigatório'),
+  state: Yup.string().required('Estado obrigatório'),
+  city: Yup.string().required('Cidade obrigatória'),
+  neighborhood: Yup.string().required('Bairro obrigatória'),
 });
 
 export const Properties: React.FC = () => {
@@ -141,6 +157,7 @@ export const Properties: React.FC = () => {
   const [pageIsLoading, setPageIsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = React.useState(false);
+  const [openPersonModal, setOpenPersonModal] = React.useState(false);
 
   const { addMessage } = useMessage();
 
@@ -178,6 +195,14 @@ export const Properties: React.FC = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+
+  const handleOpenPersonModal = () => {
+    setOpenPersonModal(true);
+  };
+
+  const handleClosePersonModal = () => {
+    setOpenPersonModal(false);
   };
 
   useEffect(() => {
@@ -246,6 +271,10 @@ export const Properties: React.FC = () => {
                     </Button>
                   </div>
                   <form onSubmit={handleSubmit(onSubmit)}>
+                    <Typography variant="inherit" color="primary">
+                      Dados básicos
+                    </Typography>
+                    <Divider title="Proprietário" />
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -277,41 +306,46 @@ export const Properties: React.FC = () => {
                     <Typography variant="inherit" color="secondary">
                       {errors.iptu_id?.message}
                     </Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      margin="normal"
-                      id="registry_office"
-                      {...register('registry_office')}
-                      error={!!errors.registry_office}
-                      label="Cartório de Registro"
-                      required
-                      autoFocus
-                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={7}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="registry_office"
+                          {...register('registry_office')}
+                          error={!!errors.registry_office}
+                          label="Nome do Cartório"
+                          required
+                          autoFocus
+                        />
 
-                    <Typography variant="inherit" color="secondary">
-                      {errors.registry_office?.message}
-                    </Typography>
+                        <Typography variant="inherit" color="secondary">
+                          {errors.registry_office?.message}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={5}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="registration_id"
+                          {...register('registration_id')}
+                          error={!!errors.registration_id}
+                          label="Número de Registro"
+                          required
+                          autoFocus
+                          type="number"
+                        />
 
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      margin="normal"
-                      id="registration_id"
-                      {...register('registration_id')}
-                      error={!!errors.registration_id}
-                      label="Número de Registro"
-                      required
-                      autoFocus
-                      type="number"
-                    />
+                        <Typography variant="inherit" color="secondary">
+                          {errors.registration_id?.message}
+                        </Typography>
+                      </Grid>
+                    </Grid>
 
-                    <Typography variant="inherit" color="secondary">
-                      {errors.registration_id?.message}
-                    </Typography>
-
-                    <Grid container>
-                      <Grid item>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={8}>
                         <TextField
                           fullWidth
                           variant="outlined"
@@ -330,12 +364,13 @@ export const Properties: React.FC = () => {
                         </Typography>
                       </Grid>
 
-                      <Grid item>
+                      <Grid item xs={4}>
                         <FormControl className={classes.formControl}>
                           <InputLabel id="demo-simple-select-label">
                             Tipo de medida
                           </InputLabel>
                           <Select
+                            fullWidth
                             label="asdv"
                             className={classes.select}
                             labelId="demo-simple-select-label"
@@ -348,6 +383,110 @@ export const Properties: React.FC = () => {
                           </Select>
                         </FormControl>
                       </Grid>
+                    </Grid>
+                    {/* Address */}
+                    <Typography variant="inherit" color="primary">
+                      Endereço
+                    </Typography>
+                    <Divider />
+                    <Grid container spacing={2}>
+                      <Grid item xs={4}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="postal_code"
+                          {...register('postal_code')}
+                          error={!!errors.postal_code}
+                          label="CEP"
+                          required
+                          autoFocus
+                        />
+                        <Typography variant="inherit" color="secondary">
+                          {errors.postal_code?.message}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="street"
+                          {...register('street')}
+                          error={!!errors.street}
+                          label="Rua"
+                          required
+                          autoFocus
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.street?.message}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <Grid container direction="row" spacing={2}>
+                      <Grid item xs={9}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="city"
+                          {...register('city')}
+                          error={!!errors.city}
+                          label="Cidade"
+                          required
+                          autoFocus
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.city?.message}
+                        </Typography>
+                      </Grid>
+
+                      <Grid item xs={3}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="state"
+                          {...register('state')}
+                          error={!!errors.state}
+                          label="UF"
+                          required
+                          autoFocus
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.state?.message}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="normal"
+                      id="neighborhood"
+                      {...register('neighborhood')}
+                      error={!!errors.neighborhood}
+                      label="Bairro"
+                      required
+                      autoFocus
+                    />
+
+                    <Typography variant="inherit" color="secondary">
+                      {errors.neighborhood?.message}
+                    </Typography>
+
+                    <Typography variant="inherit" color="primary">
+                      Proprietário
+                    </Typography>
+                    <Divider title="Proprietário" />
+                    <Grid>
+                      <Button type="button" onClick={handleOpenPersonModal}>
+                        Cadastrar Proprietário
+                      </Button>
                     </Grid>
 
                     <Button
@@ -364,6 +503,43 @@ export const Properties: React.FC = () => {
                       )}
                     </Button>
                   </form>
+                </div>
+              </Fade>
+            </Modal>
+
+            {/* Person Modal */}
+            <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              className={classes.modal}
+              open={openPersonModal}
+              onClose={handleClosePersonModal}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+              }}
+            >
+              <Fade in={openPersonModal}>
+                <div className={classes.modalPaper}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <h2 id="transition-modal-title">Nova Pessoa</h2>
+                    <Button
+                      type="button"
+                      style={{
+                        borderRadius: '50%',
+                      }}
+                      onClick={handleClosePersonModal}
+                    >
+                      <CloseIcon id="transition-modal-title" />
+                    </Button>
+                  </div>
+                  <CreatePersonForm />
                 </div>
               </Fade>
             </Modal>
