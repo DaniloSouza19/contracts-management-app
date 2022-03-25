@@ -1,1 +1,0 @@
-# contracts-management-app
