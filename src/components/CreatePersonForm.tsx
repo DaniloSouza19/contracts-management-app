@@ -1,29 +1,61 @@
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Button,
+  Checkbox,
   CircularProgress,
   Container,
+  FormControlLabel,
   TextField,
   Typography,
+  Grid,
+  Divider,
 } from '@material-ui/core';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 import { useMessage } from '../hooks/message';
 
-interface CreatePersonProps {
+interface CreatePersonFormProps {
   title?: string;
+  onSubmit?(): void;
 }
 
 interface ICreatePersonFormData {
   name: string;
+  is_legal_person?: boolean;
+  document_id: string;
+  telephone: string;
+  email: string;
+
+  // address
+  street: string;
+  postal_code: number;
+  state: string;
+  city: string;
+  neighborhood: string;
 }
 
 const schemaValidation = Yup.object({
   name: Yup.string().required('Nome é obrigatório'),
+  is_legal_person: Yup.boolean().default(false),
+  document_id: Yup.string().required('CNPJ/CPF Obrigatório'),
+  telephone: Yup.string().required('Telephone obrigatório').min(6),
+  email: Yup.string()
+    .email('Deve ser um e-mail valido')
+    .required('Email obrigatório'),
+
+  // address
+  street: Yup.string().required('Rua obrigatória'),
+  postal_code: Yup.number().required('CEP obrigatório'),
+  state: Yup.string().required('Estado obrigatório'),
+  city: Yup.string().required('Cidade obrigatória'),
+  neighborhood: Yup.string().required('Bairro obrigatória'),
 });
 
-export function CreatePersonForm({ title }: CreatePersonProps) {
+export const CreatePersonForm: React.FC<CreatePersonFormProps> = ({
+  onSubmit: onSubmitForm,
+  title,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const {
     handleSubmit,
@@ -34,30 +66,41 @@ export function CreatePersonForm({ title }: CreatePersonProps) {
   });
   const { addMessage } = useMessage();
 
-  const onSubmit = useCallback((data: ICreatePersonFormData) => {
-    try {
-      setIsLoading(true);
+  const onSubmit = useCallback(
+    (data: ICreatePersonFormData) => {
+      try {
+        setIsLoading(true);
 
-      console.log(data);
+        console.log(data);
 
-      addMessage({
-        message: 'Imóvel cadastrado com sucesso!',
-        severity: 'success',
-      });
-    } catch (error: any) {
-      addMessage({
-        message: 'Verifique os dados',
-        severity: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        addMessage({
+          message: 'Pessoa cadastrada com sucesso!',
+          severity: 'success',
+        });
+
+        // Execute parent function after submit form
+        if (onSubmitForm) {
+          setTimeout(() => onSubmitForm(), 500);
+        }
+      } catch (error: any) {
+        addMessage({
+          message: 'Verifique os dados',
+          severity: 'error',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [onSubmitForm]
+  );
 
   return (
     <Container>
       {title && <h2>{title}</h2>}
       <form onSubmit={handleSubmit(onSubmit)}>
+        <Typography variant="inherit" color="primary">
+          Dados básicos
+        </Typography>
         <TextField
           fullWidth
           variant="outlined"
@@ -72,6 +115,171 @@ export function CreatePersonForm({ title }: CreatePersonProps) {
 
         <Typography variant="inherit" color="secondary">
           {errors.name?.message}
+        </Typography>
+
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="telephone"
+              {...register('telephone')}
+              error={!!errors.telephone}
+              label="Telefone"
+              required
+              autoFocus
+            />
+
+            <Typography variant="inherit" color="secondary">
+              {errors.telephone?.message}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="email"
+              {...register('email')}
+              error={!!errors.email}
+              label="E-mail"
+              required
+              type="email"
+              autoFocus
+            />
+            <Typography variant="inherit" color="secondary">
+              {errors.email?.message}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={4}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  {...register('is_legal_person')}
+                  name="is_legal_person"
+                />
+              }
+              label="Pessoa Jurídica"
+            />
+          </Grid>
+
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="document_id"
+              {...register('document_id')}
+              error={!!errors.document_id}
+              label="CPF / CNPJ"
+              required
+              autoFocus
+            />
+
+            <Typography variant="inherit" color="secondary">
+              {errors.document_id?.message}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        {/* Address */}
+        <Typography variant="inherit" color="primary">
+          Endereço
+        </Typography>
+        <Divider />
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="postal_code"
+              {...register('postal_code')}
+              error={!!errors.postal_code}
+              label="CEP"
+              required
+              autoFocus
+            />
+            <Typography variant="inherit" color="secondary">
+              {errors.postal_code && 'CEP é obrigatório'}
+            </Typography>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="street"
+              {...register('street')}
+              error={!!errors.street}
+              label="Rua"
+              required
+              autoFocus
+            />
+
+            <Typography variant="inherit" color="secondary">
+              {errors.street?.message}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Grid container direction="row" spacing={2}>
+          <Grid item xs={9}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="city"
+              {...register('city')}
+              error={!!errors.city}
+              label="Cidade"
+              required
+              autoFocus
+            />
+
+            <Typography variant="inherit" color="secondary">
+              {errors.city?.message}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={3}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              id="state"
+              {...register('state')}
+              error={!!errors.state}
+              label="UF"
+              required
+              autoFocus
+            />
+
+            <Typography variant="inherit" color="secondary">
+              {errors.state?.message}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <TextField
+          fullWidth
+          variant="outlined"
+          margin="normal"
+          id="neighborhood"
+          {...register('neighborhood')}
+          error={!!errors.neighborhood}
+          label="Bairro"
+          required
+          autoFocus
+        />
+
+        <Typography variant="inherit" color="secondary">
+          {errors.neighborhood?.message}
         </Typography>
 
         <Button
@@ -90,4 +298,4 @@ export function CreatePersonForm({ title }: CreatePersonProps) {
       </form>
     </Container>
   );
-}
+};

@@ -595,7 +595,7 @@ export const Properties: React.FC = () => {
                       <CloseIcon id="transition-modal-title" />
                     </Button>
                   </div>
-                  <CreatePersonForm />
+                  <CreatePersonForm onSubmit={handleClosePersonModal} />
                 </div>
               </Fade>
             </Modal>
