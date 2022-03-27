@@ -186,26 +186,6 @@ export const Properties: React.FC = () => {
     resolver: yupResolver(schemaValidation),
   });
 
-  const onSubmit = useCallback(async (data: CreatePropertyFormData) => {
-    try {
-      setIsLoading(true);
-
-      console.log(data);
-
-      addMessage({
-        message: 'Imóvel cadastrado com sucesso!',
-        severity: 'success',
-      });
-    } catch (error: any) {
-      addMessage({
-        message: 'Verifique os dados',
-        severity: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -221,6 +201,31 @@ export const Properties: React.FC = () => {
   const handleClosePersonModal = () => {
     setOpenPersonModal(false);
   };
+
+  const onSubmit = useCallback(
+    async (data: CreatePropertyFormData) => {
+      try {
+        setIsLoading(true);
+
+        console.log(data);
+
+        addMessage({
+          message: 'Imóvel cadastrado com sucesso!',
+          severity: 'success',
+        });
+
+        setTimeout(handleCloseModal, 500);
+      } catch (error: any) {
+        addMessage({
+          message: 'Verifique os dados',
+          severity: 'error',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [handleCloseModal]
+  );
 
   useEffect(() => {
     setPageIsLoading(false);
