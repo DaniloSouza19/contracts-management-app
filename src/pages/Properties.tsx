@@ -30,6 +30,9 @@ import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useMessage } from '../hooks/message';
 import { CreatePersonForm } from '../components/CreatePersonForm';
+import { api } from '../services/api';
+import { getToken } from '../utils/localStorageUtils';
+import { useAuth } from '../hooks/auth';
 
 const drawerWidth = 240;
 
@@ -126,14 +129,14 @@ const useStyles = makeStyles((theme) => ({
 
 interface CreatePropertyFormData {
   description: string;
-  iptu_id: number;
+  iptu_id: string;
   registry_office: string;
-  registration_id: number;
+  registration_id: string;
   measure_type: 'm2' | 'aq';
   measure_amount: number;
 
   street: string;
-  postal_code: number;
+  postal_code: string;
   state: string;
   city: string;
   neighborhood: string;
@@ -148,14 +151,14 @@ interface IOwnerOptions {
 
 const schemaValidation = Yup.object({
   description: Yup.string().required('Descrição obrigatória'),
-  iptu_id: Yup.number().required('IPTU obrigatório'),
+  iptu_id: Yup.string().required('IPTU obrigatório'),
   registry_office: Yup.string().required('Cartório obrigatório'),
-  registration_id: Yup.number().required('Número de registro obrigatório'),
+  registration_id: Yup.string().required('Número de registro obrigatório'),
   measure_type: Yup.string().required('Tipo de medida obrigatória'),
   measure_amount: Yup.number().required('Valor de medida obrigatório'),
 
   street: Yup.string().required('Rua obrigatória'),
-  postal_code: Yup.number().required('CEP obrigatório'),
+  postal_code: Yup.string().required('CEP obrigatório'),
   state: Yup.string().required('Estado obrigatório'),
   city: Yup.string().required('Cidade obrigatória'),
   neighborhood: Yup.string().required('Bairro obrigatória'),
@@ -171,10 +174,12 @@ export const Properties: React.FC = () => {
   const [openPersonModal, setOpenPersonModal] = React.useState(false);
   const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([
     {
-      id: 'b22918de-3e09-49c4-a304-83f5056f55fe',
-      name: 'John Doe',
+      id: 'b68d41d6-53a2-4f3d-9aeb-5b08f4edd896',
+      name: 'Danilo G souza',
     },
   ]);
+
+  const { signOut } = useAuth();
 
   const { addMessage } = useMessage();
 
@@ -203,11 +208,59 @@ export const Properties: React.FC = () => {
   };
 
   const onSubmit = useCallback(
-    async (data: CreatePropertyFormData) => {
+    async ({
+      city,
+      description,
+      iptu_id,
+      measure_amount,
+      measure_type,
+      neighborhood,
+      owner_id,
+      postal_code,
+      registration_id,
+      registry_office,
+      state,
+      street,
+    }: CreatePropertyFormData) => {
       try {
         setIsLoading(true);
 
-        console.log(data);
+        const responseAddress = await api.post(
+          '/api/v1/properties-address',
+          {
+            neighborhood,
+            city,
+            postal_code,
+            state,
+            street,
+          },
+          {
+            headers: {
+              Authorization: getToken(),
+            },
+          }
+        );
+
+        const { id: address_id } = responseAddress.data;
+
+        await api.post(
+          '/api/v1/properties',
+          {
+            description,
+            iptu_id,
+            measure_amount,
+            measure_type,
+            address_id,
+            registration_id,
+            registry_office,
+            owner_id,
+          },
+          {
+            headers: {
+              Authorization: getToken(),
+            },
+          }
+        );
 
         addMessage({
           message: 'Imóvel cadastrado com sucesso!',
@@ -216,10 +269,19 @@ export const Properties: React.FC = () => {
 
         setTimeout(handleCloseModal, 500);
       } catch (error: any) {
-        addMessage({
-          message: 'Verifique os dados',
-          severity: 'error',
-        });
+        if (error.status === 401) {
+          addMessage({
+            message: 'Sessão expirou, logue novamente',
+            severity: 'error',
+          });
+
+          signOut();
+        } else {
+          addMessage({
+            message: 'Verifique os dados e tente novamente',
+            severity: 'error',
+          });
+        }
       } finally {
         setIsLoading(false);
       }
