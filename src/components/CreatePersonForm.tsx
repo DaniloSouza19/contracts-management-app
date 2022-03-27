@@ -14,6 +14,9 @@ import {
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 import { useMessage } from '../hooks/message';
+import { api } from '../services/api';
+import { getToken } from '../utils/localStorageUtils';
+import { useAuth } from '../hooks/auth';
 
 interface CreatePersonFormProps {
   title?: string;
@@ -29,7 +32,7 @@ interface ICreatePersonFormData {
 
   // address
   street: string;
-  postal_code: number;
+  postal_code: string;
   state: string;
   city: string;
   neighborhood: string;
@@ -46,7 +49,7 @@ const schemaValidation = Yup.object({
 
   // address
   street: Yup.string().required('Rua obrigatória'),
-  postal_code: Yup.number().required('CEP obrigatório'),
+  postal_code: Yup.string().required('CEP obrigatório'),
   state: Yup.string().required('Estado obrigatório'),
   city: Yup.string().required('Cidade obrigatória'),
   neighborhood: Yup.string().required('Bairro obrigatória'),
@@ -65,13 +68,58 @@ export const CreatePersonForm: React.FC<CreatePersonFormProps> = ({
     resolver: yupResolver(schemaValidation),
   });
   const { addMessage } = useMessage();
+  const { signOut } = useAuth();
 
   const onSubmit = useCallback(
-    (data: ICreatePersonFormData) => {
+    async ({
+      neighborhood,
+      city,
+      document_id,
+      email,
+      name,
+      postal_code,
+      state,
+      street,
+      telephone,
+      is_legal_person,
+    }: ICreatePersonFormData) => {
       try {
         setIsLoading(true);
 
-        console.log(data);
+        const responseAddress = await api.post(
+          '/api/v1/people-address',
+          {
+            neighborhood,
+            city,
+            postal_code,
+            state,
+            street,
+          },
+          {
+            headers: {
+              Authorization: getToken(),
+            },
+          }
+        );
+
+        const { id: address_id } = responseAddress.data;
+
+        await api.post(
+          '/api/v1/people',
+          {
+            document_id,
+            email,
+            name,
+            telephone,
+            is_legal_person,
+            address_id,
+          },
+          {
+            headers: {
+              Authorization: getToken(),
+            },
+          }
+        );
 
         addMessage({
           message: 'Pessoa cadastrada com sucesso!',
@@ -80,13 +128,22 @@ export const CreatePersonForm: React.FC<CreatePersonFormProps> = ({
 
         // Execute parent function after submit form
         if (onSubmitForm) {
-          setTimeout(() => onSubmitForm(), 500);
+          setTimeout(onSubmitForm, 500);
         }
       } catch (error: any) {
-        addMessage({
-          message: 'Verifique os dados',
-          severity: 'error',
-        });
+        if (error.status === 401) {
+          addMessage({
+            message: 'Sessão expirou, logue novamente',
+            severity: 'error',
+          });
+
+          signOut();
+        } else {
+          addMessage({
+            message: 'Verifique os dados e tente novamente',
+            severity: 'error',
+          });
+        }
       } finally {
         setIsLoading(false);
       }
