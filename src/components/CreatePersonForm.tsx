@@ -49,7 +49,7 @@ const schemaValidation = Yup.object({
 
   // address
   street: Yup.string().required('Rua obrigatória'),
-  postal_code: Yup.string().required('CEP obrigatório'),
+  postal_code: Yup.string().required('CEP obrigatório').min(8).max(8),
   state: Yup.string().required('Estado obrigatório'),
   city: Yup.string().required('Cidade obrigatória'),
   neighborhood: Yup.string().required('Bairro obrigatória'),
@@ -261,9 +261,10 @@ export const CreatePersonForm: React.FC<CreatePersonFormProps> = ({
               label="CEP"
               required
               autoFocus
+              type="number"
             />
             <Typography variant="inherit" color="secondary">
-              {errors.postal_code && 'CEP é obrigatório'}
+              {errors.postal_code}
             </Typography>
           </Grid>
           <Grid item xs={8}>
