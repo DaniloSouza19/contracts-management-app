@@ -158,7 +158,7 @@ const schemaValidation = Yup.object({
   measure_amount: Yup.number().required('Valor de medida obrigatório'),
 
   street: Yup.string().required('Rua obrigatória'),
-  postal_code: Yup.string().required('CEP obrigatório'),
+  postal_code: Yup.string().required('CEP obrigatório').min(8).max(8),
   state: Yup.string().required('Estado obrigatório'),
   city: Yup.string().required('Cidade obrigatória'),
   neighborhood: Yup.string().required('Bairro obrigatória'),
@@ -170,14 +170,9 @@ export const Properties: React.FC = () => {
   const classes = useStyles();
   const [pageIsLoading, setPageIsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [openModal, setOpenModal] = React.useState(false);
+  const [openPropertyModal, setOpenPropertyModal] = React.useState(false);
   const [openPersonModal, setOpenPersonModal] = React.useState(false);
-  const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([
-    {
-      id: 'b68d41d6-53a2-4f3d-9aeb-5b08f4edd896',
-      name: 'Danilo G souza',
-    },
-  ]);
+  const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([]);
 
   const { signOut } = useAuth();
 
@@ -192,11 +187,11 @@ export const Properties: React.FC = () => {
   });
 
   const handleOpenModal = () => {
-    setOpenModal(true);
+    setOpenPropertyModal(true);
   };
 
   const handleCloseModal = () => {
-    setOpenModal(false);
+    setOpenPropertyModal(false);
   };
 
   const handleOpenPersonModal = () => {
@@ -293,6 +288,43 @@ export const Properties: React.FC = () => {
     setPageIsLoading(false);
   }, []);
 
+  // Load all owners
+  useEffect(() => {
+    if (!openPersonModal && openPropertyModal) {
+      api
+        .get('/api/v1/people', {
+          headers: {
+            Authorization: getToken(),
+          },
+        })
+        .then((response) => {
+          const owners = response.data.map((person: IOwnerOptions) => {
+            return {
+              id: person.id,
+              name: person.name.toLowerCase(),
+            };
+          });
+
+          setOwnerOptions(owners);
+        })
+        .catch((error) => {
+          if (error.status === 401) {
+            addMessage({
+              message: 'Sessão expirou, logue novamente',
+              severity: 'error',
+            });
+
+            signOut();
+          } else {
+            addMessage({
+              message: 'Verifique os dados e tente novamente',
+              severity: 'error',
+            });
+          }
+        });
+    }
+  }, [openPersonModal, openPropertyModal]);
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -327,7 +359,7 @@ export const Properties: React.FC = () => {
               aria-labelledby="transition-modal-title"
               aria-describedby="transition-modal-description"
               className={classes.modal}
-              open={openModal}
+              open={openPropertyModal}
               onClose={handleCloseModal}
               closeAfterTransition
               BackdropComponent={Backdrop}
@@ -335,7 +367,7 @@ export const Properties: React.FC = () => {
                 timeout: 500,
               }}
             >
-              <Fade in={openModal}>
+              <Fade in={openPropertyModal}>
                 <div className={classes.modalPaper}>
                   <div
                     style={{
@@ -488,7 +520,7 @@ export const Properties: React.FC = () => {
                           autoFocus
                         />
                         <Typography variant="inherit" color="secondary">
-                          {errors.postal_code && 'CEP é obrigatório'}
+                          {errors.postal_code}
                         </Typography>
                       </Grid>
                       <Grid item xs={8}>
