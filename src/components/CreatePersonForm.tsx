@@ -131,7 +131,7 @@ export const CreatePersonForm: React.FC<CreatePersonFormProps> = ({
           setTimeout(onSubmitForm, 500);
         }
       } catch (error: any) {
-        if (error.status === 401) {
+        if (error.response.status === 401) {
           addMessage({
             message: 'Sessão expirou, logue novamente',
             severity: 'error',
