@@ -17,8 +17,15 @@ import {
   FormControl,
   Divider,
 } from '@material-ui/core';
+import {
+  DataGrid,
+  GridColDef,
+  GridValueFormatterParams,
+  GridCellValue,
+  GridCellParams,
+  GridValueGetterParams,
+} from '@material-ui/data-grid';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import AddBoxIcon from '@material-ui/icons/AddBox';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CloseIcon from '@material-ui/icons/Close';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -26,6 +33,7 @@ import Fade from '@material-ui/core/Fade';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { format, parseISO } from 'date-fns';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useMessage } from '../hooks/message';
@@ -173,6 +181,7 @@ export const Properties: React.FC = () => {
   const [openPropertyModal, setOpenPropertyModal] = React.useState(false);
   const [openPersonModal, setOpenPersonModal] = React.useState(false);
   const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([]);
+  const [rows, setRows] = useState<[]>([]);
 
   const { signOut } = useAuth();
 
@@ -201,6 +210,92 @@ export const Properties: React.FC = () => {
   const handleClosePersonModal = () => {
     setOpenPersonModal(false);
   };
+
+  const columns: GridColDef[] = [
+    { field: 'id', headerName: 'Id', width: 150, hide: true },
+    {
+      field: 'description',
+      headerName: 'Descrição',
+      width: 180,
+      editable: false,
+    },
+    {
+      field: 'created_at',
+      headerName: 'Data de criação',
+      type: 'date',
+      width: 180,
+      editable: false,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '';
+        }
+
+        const dateParsed = parseISO(value?.toString());
+
+        const formattedDate = format(dateParsed, 'd/MM/yy H:mm');
+
+        return formattedDate;
+      },
+    },
+    {
+      field: 'iptu_id',
+      headerName: 'IPTU',
+      type: 'string',
+      width: 150,
+      editable: false,
+    },
+    {
+      field: 'registry_office',
+      headerName: 'Cartório',
+      description: 'Nome do cartório de registro',
+      width: 160,
+    },
+    {
+      field: 'registration_id',
+      headerName: 'Num. registro',
+      description: 'Número de registro',
+      width: 160,
+    },
+    {
+      field: 'measure_amount',
+      headerName: 'Medida',
+      type: 'number',
+      width: 180,
+      editable: false,
+    },
+  ];
+
+  const loadingProperties = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await api.get(`/api/v1/properties`, {
+        headers: {
+          Authorization: getToken(),
+        },
+      });
+
+      setRows(response.data);
+    } catch (error: any) {
+      if (error.response.status === 401) {
+        addMessage({
+          message: 'Sessão expirou, logue novamente',
+          severity: 'error',
+        });
+
+        signOut();
+      } else {
+        addMessage({
+          message: 'Verifique os dados e tente novamente',
+          severity: 'error',
+        });
+      }
+      setRows([]);
+    } finally {
+      setIsLoading(false);
+      setPageIsLoading(false);
+    }
+  }, [signOut]);
 
   const onSubmit = useCallback(
     async ({
@@ -264,7 +359,7 @@ export const Properties: React.FC = () => {
 
         setTimeout(handleCloseModal, 500);
       } catch (error: any) {
-        if (error.status === 401) {
+        if (error.response.status === 401) {
           addMessage({
             message: 'Sessão expirou, logue novamente',
             severity: 'error',
@@ -288,6 +383,12 @@ export const Properties: React.FC = () => {
     setPageIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (!openPropertyModal) {
+      loadingProperties();
+    }
+  }, [openPropertyModal]);
+
   // Load all owners
   useEffect(() => {
     if (!openPersonModal && openPropertyModal) {
@@ -308,7 +409,7 @@ export const Properties: React.FC = () => {
           setOwnerOptions(owners);
         })
         .catch((error) => {
-          if (error.status === 401) {
+          if (error.response.status === 401) {
             addMessage({
               message: 'Sessão expirou, logue novamente',
               severity: 'error',
@@ -344,11 +445,20 @@ export const Properties: React.FC = () => {
                 <Paper className={classes.paper}>
                   <Typography variant="h5">Cadastro de imóveis</Typography>
 
-                  <div>
-                    <Button type="button" onClick={handleOpenModal}>
+                  <div style={{ margin: '10px 0' }}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      color="primary"
+                      type="button"
+                      onClick={handleOpenModal}
+                    >
                       Novo imóvel
-                      <AddBoxIcon />
+                      <AddCircleIcon fontSize="large" htmlColor="green" />
                     </Button>
+                  </div>
+                  <div style={{ height: 400, width: '100%' }}>
+                    <DataGrid rows={rows} columns={columns} pageSize={5} />
                   </div>
                 </Paper>
               </Grid>
