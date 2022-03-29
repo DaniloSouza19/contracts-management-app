@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const Dashboard: React.FC = () => {
   const classes = useStyles();
-  const [orders, setOrders] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const { user, signOut } = useAuth();
   const [pageIsLoading, setPageIsLoading] = useState(true);
 
@@ -82,26 +82,19 @@ export const Dashboard: React.FC = () => {
 
   const preLoadingSuggestedOrders = useCallback(async () => {
     try {
-      const response = await api.get(`/orders-suggested/`, {
-        params: {
-          onlyUnauthorized: true,
-        },
+      const { data } = await api.get(`/api/v1/contracts/`, {
         headers: {
           Authorization: getToken(),
         },
       });
 
-      const responseSuggestedOrders = response.data.filter(
-        (order: any) => order.user.email === user.email
-      );
-
-      setOrders(responseSuggestedOrders);
+      setContracts(data);
     } catch (error: any) {
       if (error.response?.status === 401) {
         signOut();
       }
 
-      setOrders([]);
+      setContracts([]);
     } finally {
       setPageIsLoading(false);
     }
@@ -153,10 +146,10 @@ export const Dashboard: React.FC = () => {
                         <Typography variant="h6">Contratos ativos</Typography>
                       </div>
                       <div>
-                        <Typography variant="h4">{orders.length}</Typography>
+                        <Typography variant="h4">{contracts.length}</Typography>
                       </div>
                       <div>
-                        <Link className={classes.link} to="/my-orders">
+                        <Link className={classes.link} to="/contracts">
                           <Typography variant="h6" color="primary">
                             Detalhes
                           </Typography>
