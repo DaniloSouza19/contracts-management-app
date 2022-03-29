@@ -294,6 +294,28 @@ export const Contracts: React.FC = () => {
       description: 'Número de registro',
       width: 160,
     },
+    {
+      field: 'contractor',
+      headerName: 'Contratante',
+      description: 'Nome do contratante',
+      width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        const customer = value as IOwnerOptions;
+
+        return customer.name;
+      },
+    },
+    {
+      field: 'customer',
+      headerName: 'Contratado',
+      description: 'Nome do contratado',
+      width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        const owner = value as IOwnerOptions;
+
+        return owner.name;
+      },
+    },
   ];
 
   const loadingContracts = useCallback(async () => {
