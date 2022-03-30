@@ -11,10 +11,6 @@ import {
   Button,
   Modal,
   TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Divider,
 } from '@material-ui/core';
 import {
@@ -22,7 +18,9 @@ import {
   GridColDef,
   GridValueFormatterParams,
   GridCellValue,
+  GridCellParams,
 } from '@material-ui/data-grid';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CloseIcon from '@material-ui/icons/Close';
@@ -31,7 +29,7 @@ import Fade from '@material-ui/core/Fade';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { format, parseISO } from 'date-fns';
+import { format, isBefore, parseISO } from 'date-fns';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useMessage } from '../hooks/message';
@@ -208,6 +206,39 @@ export const Contracts: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 150, hide: true },
+    {
+      field: 'updated_at',
+      headerName: 'Status',
+      width: 120,
+      editable: false,
+      renderCell: ({ row }: GridCellParams) => {
+        const end_date = row.end_date as string;
+
+        const endDateParsedISO = parseISO(end_date);
+
+        const today = new Date();
+
+        const contractsIsInactive = isBefore(endDateParsedISO, today);
+
+        return (
+          <Grid
+            container
+            alignItems="center"
+            alignContent="center"
+            justifyContent="center"
+          >
+            <Grid item>
+              <FiberManualRecordIcon
+                htmlColor={contractsIsInactive ? 'red' : 'green'}
+              />
+            </Grid>
+            <Grid>
+              <span> {contractsIsInactive ? 'Inativo' : 'Ativo'}</span>
+            </Grid>
+          </Grid>
+        );
+      },
+    },
     {
       field: 'description',
       headerName: 'Descrição',
