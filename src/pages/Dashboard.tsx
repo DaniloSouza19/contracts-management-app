@@ -9,6 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { CircularProgress } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { isAfter, isBefore, parseISO } from 'date-fns/esm';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useAuth } from '../hooks/auth';
@@ -70,11 +71,22 @@ const useStyles = makeStyles((theme) => ({
       textDecoration: 'underline',
     },
   },
+  colorRed: {
+    color: 'red',
+  },
 }));
+
+interface IContract {
+  id: string;
+  description: string;
+  price: string;
+  end_date: string;
+  start_date: string;
+}
 
 export const Dashboard: React.FC = () => {
   const classes = useStyles();
-  const [contracts, setContracts] = useState([]);
+  const [contracts, setContracts] = useState<IContract[]>([] as IContract[]);
   const { user, signOut } = useAuth();
   const [pageIsLoading, setPageIsLoading] = useState(true);
 
@@ -146,7 +158,55 @@ export const Dashboard: React.FC = () => {
                         <Typography variant="h6">Contratos ativos</Typography>
                       </div>
                       <div>
-                        <Typography variant="h4">{contracts.length}</Typography>
+                        <Typography variant="h4">
+                          {
+                            contracts.filter((contract) => {
+                              const end_date = parseISO(contract.end_date);
+
+                              const hasPast = isAfter(end_date, new Date());
+
+                              return hasPast;
+                            }).length
+                          }
+                        </Typography>
+                      </div>
+                      <div>
+                        <Link className={classes.link} to="/contracts">
+                          <Typography variant="h6" color="primary">
+                            Detalhes
+                          </Typography>
+                        </Link>
+                      </div>
+                    </Grid>
+                  </Paper>
+                </Grid>
+                <Grid item>
+                  <Paper className={fixedHeightPaper}>
+                    <Grid
+                      alignItems="center"
+                      alignContent="center"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        height: '100%',
+                      }}
+                    >
+                      <div>
+                        <Typography variant="h6">Contratos Vencidos</Typography>
+                      </div>
+                      <div>
+                        <Typography variant="h4" className={classes.colorRed}>
+                          {
+                            contracts.filter((contract) => {
+                              const end_date = parseISO(contract.end_date);
+
+                              const hasPast = isBefore(end_date, new Date());
+
+                              return hasPast;
+                            }).length
+                          }
+                        </Typography>
                       </div>
                       <div>
                         <Link className={classes.link} to="/contracts">
