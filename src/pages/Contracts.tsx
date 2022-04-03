@@ -153,6 +153,14 @@ interface IPropertyOptions {
   description: string;
 }
 
+interface IContract {
+  id: string;
+  description: string;
+  price: string;
+  end_date: string;
+  start_date: string;
+}
+
 const schemaValidation = Yup.object({
   description: Yup.string().required('Descrição obrigatória'),
   customer_id: Yup.string().uuid().required('Contratado obrigatório'),
@@ -174,7 +182,7 @@ export const Contracts: React.FC = () => {
   const [propertyOptions, setPropertyOptions] = useState<IPropertyOptions[]>(
     []
   );
-  const [rows, setRows] = useState<[]>([]);
+  const [rows, setRows] = useState<IContract[]>([] as IContract[]);
 
   const { signOut } = useAuth();
 
@@ -207,34 +215,18 @@ export const Contracts: React.FC = () => {
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 150, hide: true },
     {
-      field: 'updated_at',
+      field: 'active',
       headerName: 'Status',
       width: 120,
       editable: false,
-      renderCell: ({ row }: GridCellParams) => {
-        const end_date = row.end_date as string;
-
-        const endDateParsedISO = parseISO(end_date);
-
-        const today = new Date();
-
-        const contractsIsInactive = isBefore(endDateParsedISO, today);
-
+      renderCell: ({ value }: GridCellParams) => {
         return (
-          <Grid
-            container
-            alignItems="center"
-            alignContent="center"
-            justifyContent="center"
-          >
-            <Grid item>
-              <FiberManualRecordIcon
-                htmlColor={contractsIsInactive ? 'red' : 'green'}
-              />
-            </Grid>
-            <Grid>
-              <span> {contractsIsInactive ? 'Inativo' : 'Ativo'}</span>
-            </Grid>
+          <Grid container alignItems="center">
+            <FiberManualRecordIcon htmlColor={!value ? 'red' : 'green'} />
+            <span style={{ marginLeft: '10px' }}>
+              {' '}
+              {!value ? 'Vencido' : 'Ativo'}
+            </span>
           </Grid>
         );
       },
@@ -359,7 +351,22 @@ export const Contracts: React.FC = () => {
         },
       });
 
-      setRows(response.data);
+      const contracts = response.data.map((contract: IContract) => {
+        const end_date = contract.end_date as string;
+
+        const endDateParsedISO = parseISO(end_date);
+
+        const today = new Date();
+
+        const contractsIsInactive = isBefore(endDateParsedISO, today);
+
+        return {
+          ...contract,
+          active: !contractsIsInactive,
+        };
+      });
+
+      setRows(contracts);
     } catch (error: any) {
       if (error.response.status === 401) {
         addMessage({
@@ -582,7 +589,7 @@ export const Contracts: React.FC = () => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <h2 id="transition-modal-title">Novo imóvel</h2>
+                    <h2 id="transition-modal-title">Novo Contrato</h2>
                     <Button
                       type="button"
                       style={{
@@ -830,7 +837,7 @@ export const Contracts: React.FC = () => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <h2 id="transition-modal-title">Cadastro de partes</h2>
+                    <h2 id="transition-modal-title">Cadastro de Contratado</h2>
                     <Button
                       type="button"
                       style={{
