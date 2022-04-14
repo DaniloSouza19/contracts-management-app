@@ -11,6 +11,8 @@ import { Accounts } from './pages/Accounts';
 import { SignIn } from './pages/SignIn';
 import { Properties } from './pages/Properties';
 import { Contracts } from './pages/Contracts';
+import { Payments } from './pages/Payments';
+import { Reports } from './pages/Reports';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
@@ -48,6 +50,22 @@ export function Router() {
           element={
             <RequireAuth>
               <Contracts />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <RequireAuth>
+              <Payments />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <RequireAuth>
+              <Reports />
             </RequireAuth>
           }
         />
