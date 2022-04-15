@@ -544,6 +544,18 @@ export const Payments: React.FC = () => {
       });
   }, []);
 
+  // reload payments from contract when modal is closed
+  useEffect(() => {
+    if (
+      !openMakePaymentModal &&
+      contractSelected &&
+      contractSelected.id.length > 0 &&
+      !openPaymentModal
+    ) {
+      loadingPayments(contractSelected.id);
+    }
+  }, [openMakePaymentModal, contractSelected, openPaymentModal]);
+
   return (
     <div className={classes.root}>
       <CssBaseline />
