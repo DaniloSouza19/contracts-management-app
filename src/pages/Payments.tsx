@@ -216,6 +216,20 @@ export const Payments: React.FC = () => {
       },
     },
     {
+      field: 'value',
+      headerName: 'Valor',
+      type: 'string',
+      width: 150,
+      editable: false,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '';
+        }
+
+        return formatValueAsCurrency(Number(value));
+      },
+    },
+    {
       field: 'created_at',
       headerName: 'Data de criação',
       type: 'date',
@@ -234,24 +248,28 @@ export const Payments: React.FC = () => {
       },
     },
     {
-      field: 'value',
-      headerName: 'Valor',
-      type: 'string',
-      width: 150,
+      field: 'due_date',
+      headerName: 'Data de venc.',
+      type: 'date',
+      width: 170,
       editable: false,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         if (!value) {
           return '';
         }
 
-        return formatValueAsCurrency(Number(value));
+        const dateParsed = parseISO(value?.toString());
+
+        const formattedDate = format(dateParsed, 'd/MM/yyyy');
+
+        return formattedDate;
       },
     },
     {
-      field: 'due_date',
-      headerName: 'Data de venc.',
+      field: 'payment_date',
+      headerName: 'Data Pag.',
       type: 'date',
-      width: 180,
+      width: 170,
       editable: false,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         if (!value) {
@@ -268,8 +286,8 @@ export const Payments: React.FC = () => {
     {
       field: 'contract',
       headerName: 'Contrato',
-      description: 'Nome do cartório de registro',
-      width: 160,
+      description: 'Descrição do contrato',
+      width: 190,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         const contract = value as IContract;
 
@@ -277,28 +295,30 @@ export const Payments: React.FC = () => {
       },
     },
     {
-      field: 'payment_date',
-      headerName: 'Data Pag.',
-      type: 'date',
-      width: 180,
-      editable: false,
+      field: 'additional_fees',
+      headerName: 'Taxas adicionais',
+      description: 'Número de registro',
+      width: 160,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         if (!value) {
           return '';
         }
 
-        const dateParsed = parseISO(value?.toString());
-
-        const formattedDate = format(dateParsed, 'd/MM/yyyy');
-
-        return formattedDate;
+        return formatValueAsCurrency(Number(value));
       },
     },
     {
-      field: 'registration_id',
-      headerName: 'Num. registro',
-      description: 'Número de registro',
+      field: 'discount',
+      headerName: 'Desconto',
+      description: 'Valor de desconto',
       width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '';
+        }
+
+        return formatValueAsCurrency(Number(value));
+      },
     },
   ];
 
