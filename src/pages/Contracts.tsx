@@ -38,6 +38,7 @@ import { api } from '../services/api';
 import { getToken } from '../utils/localStorageUtils';
 import { useAuth } from '../hooks/auth';
 import { formatValueAsCurrency } from '../utils/formatter';
+import { RenewContractForm } from '../components/RenewContractForm';
 
 const drawerWidth = 240;
 
@@ -178,11 +179,14 @@ export const Contracts: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openPropertyModal, setOpenPropertyModal] = React.useState(false);
   const [openPersonModal, setOpenPersonModal] = React.useState(false);
+  const [openRenewContractModal, setOpenRenewContractModal] =
+    React.useState(false);
   const [ownerOptions, setOwnerOptions] = useState<IOwnerOptions[]>([]);
   const [propertyOptions, setPropertyOptions] = useState<IPropertyOptions[]>(
     []
   );
   const [rows, setRows] = useState<IContract[]>([] as IContract[]);
+  const [contractSelected, setContractSelected] = useState<IContract>();
 
   const { signOut } = useAuth();
 
@@ -212,6 +216,14 @@ export const Contracts: React.FC = () => {
     setOpenPersonModal(false);
   };
 
+  const handleOpenRenewModal = () => {
+    setOpenRenewContractModal(true);
+  };
+
+  const handleCloseRenewModal = () => {
+    setOpenRenewContractModal(false);
+  };
+
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 150, hide: true },
     {
@@ -227,6 +239,41 @@ export const Contracts: React.FC = () => {
               {' '}
               {!value ? 'Vencido' : 'Ativo'}
             </span>
+          </Grid>
+        );
+      },
+    },
+    {
+      field: 'updated_at',
+      headerName: 'Renovar',
+      width: 130,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: ({ row }: GridCellParams) => {
+        const { end_date } = row;
+
+        const dateParsedToISO = parseISO(end_date);
+
+        const contractIsExpired = isBefore(new Date(), dateParsedToISO);
+
+        const onSubmit = useCallback(() => {
+          setContractSelected(row as IContract);
+          handleOpenRenewModal();
+        }, [handleOpenRenewModal]);
+
+        return (
+          <Grid container alignItems="center">
+            <Button
+              fullWidth
+              type="button"
+              variant="contained"
+              color="primary"
+              onClick={onSubmit}
+              disabled={contractIsExpired}
+            >
+              Renovar
+            </Button>
           </Grid>
         );
       },
@@ -530,6 +577,18 @@ export const Contracts: React.FC = () => {
     }
   }, [openPersonModal, openPropertyModal]);
 
+  // reload contracts from contract when modal is closed
+  useEffect(() => {
+    if (
+      !openRenewContractModal &&
+      contractSelected &&
+      contractSelected.id.length > 0 &&
+      !openRenewContractModal
+    ) {
+      loadingContracts();
+    }
+  }, [openRenewContractModal, contractSelected, openRenewContractModal]);
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -633,7 +692,7 @@ export const Contracts: React.FC = () => {
                           error={!!errors.start_date}
                           label="Data inicio"
                           required
-                          autoFocus
+                          focused
                           type="date"
                         />
 
@@ -651,7 +710,7 @@ export const Contracts: React.FC = () => {
                           error={!!errors.end_date}
                           label="Data fim"
                           required
-                          autoFocus
+                          focused
                           type="date"
                         />
 
@@ -849,6 +908,29 @@ export const Contracts: React.FC = () => {
                     </Button>
                   </div>
                   <CreatePersonForm onSubmit={handleClosePersonModal} />
+                </div>
+              </Fade>
+            </Modal>
+
+            {/* Modal de pagamento de lançamento */}
+            <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              className={classes.modal}
+              open={openRenewContractModal}
+              onClose={handleCloseRenewModal}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+              }}
+            >
+              <Fade in={openRenewContractModal}>
+                <div className={classes.modalPaper}>
+                  <RenewContractForm
+                    contract={contractSelected as IContract}
+                    onSubmit={handleCloseRenewModal}
+                  />
                 </div>
               </Fade>
             </Modal>
