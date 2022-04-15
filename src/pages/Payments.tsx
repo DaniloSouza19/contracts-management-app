@@ -255,13 +255,13 @@ export const Payments: React.FC = () => {
     },
     {
       field: 'updated_at',
-      headerName: 'Fazer pagamento',
+      headerName: 'Pagar',
       width: 130,
       editable: false,
       disableColumnMenu: true,
       sortable: false,
       renderCell: ({ row }: GridCellParams) => {
-        const { id, description } = row;
+        const { id, description, is_paid } = row;
 
         const onSubmit = useCallback(() => {
           setPaymentSelected({
@@ -273,7 +273,14 @@ export const Payments: React.FC = () => {
 
         return (
           <Grid container alignItems="center">
-            <Button fullWidth type="button" onClick={onSubmit}>
+            <Button
+              fullWidth
+              type="button"
+              variant="contained"
+              color="primary"
+              onClick={onSubmit}
+              disabled={is_paid}
+            >
               Pagar
             </Button>
           </Grid>
