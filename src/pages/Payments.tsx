@@ -30,7 +30,7 @@ import Fade from '@material-ui/core/Fade';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { format, isBefore, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useMessage } from '../hooks/message';
@@ -38,6 +38,7 @@ import { api } from '../services/api';
 import { getToken } from '../utils/localStorageUtils';
 import { useAuth } from '../hooks/auth';
 import { formatValueAsCurrency } from '../utils/formatter';
+import { MakePaymentForm } from '../components/MakePaymentForm';
 
 const drawerWidth = 240;
 
@@ -176,10 +177,18 @@ export const Payments: React.FC = () => {
   const [pageIsLoading, setPageIsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [openPaymentModal, setOpenPaymentModal] = React.useState(false);
+  const [openMakePaymentModal, setOpenMakePaymentModal] = React.useState(false);
   const [contractOptions, setContractOptions] = useState<IContractOptions[]>(
     []
   );
   const [contractSelected, setContractSelected] = useState<IContractOptions>();
+  const [paymentSelected, setPaymentSelected] = useState<{
+    payment_id: string;
+    payment_name: string;
+  }>({
+    payment_id: '',
+    payment_name: '',
+  });
 
   const [rows, setRows] = useState<IContract[]>([] as IContract[]);
 
@@ -211,6 +220,14 @@ export const Payments: React.FC = () => {
     setOpenPaymentModal(false);
   };
 
+  const handleOpenMakePaymentModal = () => {
+    setOpenMakePaymentModal(true);
+  };
+
+  const handleCloseMakePaymentModal = () => {
+    setOpenMakePaymentModal(false);
+  };
+
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 150, hide: true },
     {
@@ -232,6 +249,33 @@ export const Payments: React.FC = () => {
               {' '}
               {!value ? 'Não' : 'Sim'}
             </span>
+          </Grid>
+        );
+      },
+    },
+    {
+      field: 'updated_at',
+      headerName: 'Fazer pagamento',
+      width: 130,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: ({ row }: GridCellParams) => {
+        const { id, description } = row;
+
+        const onSubmit = useCallback(() => {
+          setPaymentSelected({
+            payment_id: id as string,
+            payment_name: description,
+          });
+          handleOpenMakePaymentModal();
+        }, [handleOpenMakePaymentModal]);
+
+        return (
+          <Grid container alignItems="center">
+            <Button fullWidth type="button" onClick={onSubmit}>
+              Pagar
+            </Button>
           </Grid>
         );
       },
@@ -770,6 +814,30 @@ export const Payments: React.FC = () => {
                       )}
                     </Button>
                   </form>
+                </div>
+              </Fade>
+            </Modal>
+
+            {/* Modal de pagamento de lançamento */}
+            <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              className={classes.modal}
+              open={openMakePaymentModal}
+              onClose={handleCloseMakePaymentModal}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+              }}
+            >
+              <Fade in={openMakePaymentModal}>
+                <div className={classes.modalPaper}>
+                  <MakePaymentForm
+                    payment_id={paymentSelected.payment_id}
+                    onSubmit={handleCloseMakePaymentModal}
+                    payment_name={paymentSelected?.payment_name}
+                  />
                 </div>
               </Fade>
             </Modal>
