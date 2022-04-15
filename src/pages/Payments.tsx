@@ -453,21 +453,17 @@ export const Payments: React.FC = () => {
       try {
         setIsLoading(true);
 
-        await api.post(
-          `/api/v1/contracts/${contract_id}/payments`,
-          {
-            description,
-            due_date,
-            additional_fees,
-            discount,
-            payment_date,
+        const bodyData = { description, due_date, additional_fees, discount };
+
+        if (payment_date) {
+          Object.assign(bodyData, { ...bodyData, payment_date });
+        }
+
+        await api.post(`/api/v1/contracts/${contract_id}/payments`, bodyData, {
+          headers: {
+            Authorization: getToken(),
           },
-          {
-            headers: {
-              Authorization: getToken(),
-            },
-          }
-        );
+        });
 
         addMessage({
           message: 'Pagamento registrado com sucesso!',
@@ -762,6 +758,7 @@ export const Payments: React.FC = () => {
                           label="Valor de desconto"
                           autoFocus
                           type="number"
+                          defaultValue={0}
                         />
 
                         <Typography variant="inherit" color="secondary">
