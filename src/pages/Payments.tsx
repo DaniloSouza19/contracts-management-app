@@ -136,6 +136,7 @@ interface CreatePaymentFormData {
   description: string;
   contract_id: string;
   due_date: Date;
+  payment_date?: Date | string | null;
   additional_fees?: number;
   discount?: number;
 }
@@ -157,6 +158,7 @@ const schemaValidation = Yup.object({
   description: Yup.string().required('Descrição obrigatória'),
   contract_id: Yup.string().uuid().required('Contrato obrigatório'),
   due_date: Yup.date().required('Data de pagamento obrigatória'),
+  payment_date: Yup.string().nullable(),
   additional_fees: Yup.number().default(0),
   discount: Yup.number().default(0),
 });
@@ -394,6 +396,7 @@ export const Payments: React.FC = () => {
       due_date,
       contract_id,
       additional_fees,
+      payment_date,
       discount,
     }: CreatePaymentFormData) => {
       try {
@@ -406,6 +409,7 @@ export const Payments: React.FC = () => {
             due_date,
             additional_fees,
             discount,
+            payment_date,
           },
           {
             headers: {
@@ -635,7 +639,7 @@ export const Payments: React.FC = () => {
                     </Typography>
 
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid item xs={6}>
                         <TextField
                           fullWidth
                           variant="outlined"
@@ -643,14 +647,32 @@ export const Payments: React.FC = () => {
                           id="due_date"
                           {...register('due_date')}
                           error={!!errors.due_date}
-                          label="Data de pagamento"
+                          label="Data de vencimento"
                           required
-                          autoFocus
+                          focused
                           type="date"
                         />
 
                         <Typography variant="inherit" color="secondary">
                           {errors.due_date?.message}
+                        </Typography>
+                      </Grid>
+
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="payment_date"
+                          {...register('payment_date')}
+                          error={!!errors.payment_date}
+                          label="Data de pagamento"
+                          type="date"
+                          focused
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.payment_date?.message}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -693,6 +715,43 @@ export const Payments: React.FC = () => {
 
                         <Typography variant="inherit" color="secondary">
                           {errors.discount}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <Typography variant="inherit" color="primary">
+                      Contrato
+                    </Typography>
+                    <Divider title="feesAndDiscount" />
+                    <Grid
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                      alignItems="center"
+                    >
+                      <Grid item xs={12}>
+                        <Autocomplete
+                          options={contractOptions}
+                          getOptionLabel={(option) => option.id}
+                          renderOption={(option) => option.description}
+                          fullWidth
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              fullWidth
+                              variant="outlined"
+                              margin="normal"
+                              id="contract_id"
+                              {...register('contract_id')}
+                              error={!!errors.contract_id}
+                              label="Contrato"
+                              required
+                              autoFocus
+                            />
+                          )}
+                        />
+                        <Typography variant="inherit" color="secondary">
+                          {errors.contract_id?.message}
                         </Typography>
                       </Grid>
                     </Grid>
