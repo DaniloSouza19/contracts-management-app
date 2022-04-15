@@ -21,6 +21,7 @@ import {
   GridCellParams,
 } from '@material-ui/data-grid';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import SearchIcon from '@material-ui/icons/Search';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CloseIcon from '@material-ui/icons/Close';
@@ -160,6 +161,14 @@ const schemaValidation = Yup.object({
   discount: Yup.number().default(0),
 });
 
+interface IContractFormData {
+  contract_id: string;
+}
+
+const schemaContractValidation = Yup.object({
+  contract_id: Yup.string().required('Contrato obrigatório'),
+});
+
 export const Payments: React.FC = () => {
   const classes = useStyles();
   const [pageIsLoading, setPageIsLoading] = useState(true);
@@ -168,6 +177,8 @@ export const Payments: React.FC = () => {
   const [contractOptions, setContractOptions] = useState<IContractOptions[]>(
     []
   );
+  const [contractSelected, setContractSelected] = useState<IContractOptions>();
+
   const [rows, setRows] = useState<IContract[]>([] as IContract[]);
 
   const { signOut } = useAuth();
@@ -180,6 +191,14 @@ export const Payments: React.FC = () => {
     formState: { errors },
   } = useForm<CreatePaymentFormData>({
     resolver: yupResolver(schemaValidation),
+  });
+
+  const {
+    register: registerContractForm,
+    handleSubmit: handleSubmitContractForm,
+    formState: { errors: errorsContract },
+  } = useForm<IContractFormData>({
+    resolver: yupResolver(schemaContractValidation),
   });
 
   const handleOpenModal = () => {
@@ -322,52 +341,52 @@ export const Payments: React.FC = () => {
     },
   ];
 
-  const loadingPayments = useCallback(async () => {
-    try {
-      setIsLoading(true);
+  const loadingPayments = useCallback(
+    async (contract_id?: string) => {
+      try {
+        setIsLoading(true);
 
-      const response = await api.get(`/api/v1/payments`, {
-        headers: {
-          Authorization: getToken(),
-        },
-      });
-
-      const contracts = response.data.map((contract: IContract) => {
-        const end_date = contract.end_date as string;
-
-        const endDateParsedISO = parseISO(end_date);
-
-        const today = new Date();
-
-        const contractsIsInactive = isBefore(endDateParsedISO, today);
-
-        return {
-          ...contract,
-          active: !contractsIsInactive,
-        };
-      });
-
-      setRows(contracts);
-    } catch (error: any) {
-      if (error.response.status === 401) {
-        addMessage({
-          message: 'Sessão expirou, logue novamente',
-          severity: 'error',
+        const response = await api.get(`/api/v1/payments`, {
+          headers: {
+            Authorization: getToken(),
+          },
+          params: {
+            contract_id,
+          },
         });
 
-        signOut();
-      } else {
-        addMessage({
-          message: 'Verifique os dados e tente novamente',
-          severity: 'error',
-        });
+        const payments = response.data as CreatePaymentFormData[];
+
+        setRows(response.data);
+
+        if (payments.length === 0) {
+          addMessage({
+            message: 'Nenhum pagamento encontrado',
+            severity: 'info',
+          });
+        }
+      } catch (error: any) {
+        if (error.response.status === 401) {
+          addMessage({
+            message: 'Sessão expirou, logue novamente',
+            severity: 'error',
+          });
+
+          signOut();
+        } else {
+          addMessage({
+            message: 'Verifique os dados e tente novamente',
+            severity: 'error',
+          });
+        }
+        setRows([]);
+      } finally {
+        setIsLoading(false);
+        setPageIsLoading(false);
       }
-      setRows([]);
-    } finally {
-      setIsLoading(false);
-      setPageIsLoading(false);
-    }
-  }, [signOut]);
+    },
+    [signOut]
+  );
 
   const onSubmit = useCallback(
     async ({
@@ -422,52 +441,57 @@ export const Payments: React.FC = () => {
     [handleCloseModal]
   );
 
+  const onSubmitSearchContracts = useCallback(
+    async ({ contract_id }: IContractFormData) => {
+      const [, id] = contract_id.split(' | ');
+
+      const selected = contractOptions.find((contract) => contract.id === id);
+
+      setContractSelected(selected);
+
+      await loadingPayments(id);
+    },
+    [loadingPayments, contractOptions]
+  );
+
   useEffect(() => {
     setPageIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (!openPaymentModal) {
-      loadingPayments();
-    }
-  }, [openPaymentModal]);
-
   // Load all contracts
   useEffect(() => {
-    if (openPaymentModal) {
-      api
-        .get('/api/v1/contracts', {
-          headers: {
-            Authorization: getToken(),
-          },
-        })
-        .then((response) => {
-          const contracts = response.data.map((contract: IContractOptions) => {
-            return {
-              id: contract.id,
-              description: contract.description.toLowerCase(),
-            };
+    api
+      .get('/api/v1/contracts', {
+        headers: {
+          Authorization: getToken(),
+        },
+      })
+      .then((response) => {
+        const contracts = response.data.map((contract: IContractOptions) => {
+          return {
+            id: contract.id,
+            description: contract.description.toLowerCase(),
+          };
+        });
+
+        setContractOptions(contracts);
+      })
+      .catch((error) => {
+        if (error.response.status === 401) {
+          addMessage({
+            message: 'Sessão expirou, logue novamente',
+            severity: 'error',
           });
 
-          setContractOptions(contracts);
-        })
-        .catch((error) => {
-          if (error.response.status === 401) {
-            addMessage({
-              message: 'Sessão expirou, logue novamente',
-              severity: 'error',
-            });
-
-            signOut();
-          } else {
-            addMessage({
-              message: 'Verifique os dados e tente novamente',
-              severity: 'error',
-            });
-          }
-        });
-    }
-  }, [openPaymentModal]);
+          signOut();
+        } else {
+          addMessage({
+            message: 'Verifique os dados e tente novamente',
+            severity: 'error',
+          });
+        }
+      });
+  }, []);
 
   return (
     <div className={classes.root}>
@@ -488,38 +512,57 @@ export const Payments: React.FC = () => {
                 <Paper className={classes.paper}>
                   <Typography variant="h5">Registro de Pagamentos</Typography>
 
-                  <Grid
-                    container
-                    justifyContent="center"
-                    spacing={2}
-                    alignItems="center"
+                  <form
+                    onSubmit={handleSubmitContractForm(onSubmitSearchContracts)}
                   >
-                    <Grid item xs={12}>
-                      <Autocomplete
-                        options={contractOptions}
-                        getOptionLabel={(option) => option.id}
-                        renderOption={(option) => option.description}
-                        fullWidth
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            fullWidth
-                            variant="outlined"
-                            margin="normal"
-                            id="contract_id"
-                            {...register('contract_id')}
-                            error={!!errors.contract_id}
-                            label="Contrato"
-                            required
-                            autoFocus
-                          />
-                        )}
-                      />
-                      <Typography variant="inherit" color="secondary">
-                        {errors.contract_id?.message}
-                      </Typography>
+                    <Grid
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                      alignItems="center"
+                    >
+                      <Grid item xs={11}>
+                        <Autocomplete
+                          options={contractOptions}
+                          getOptionLabel={(option) =>
+                            `${option.description} | ${option.id}`
+                          }
+                          renderOption={(option) => option.description}
+                          fullWidth
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              fullWidth
+                              variant="outlined"
+                              margin="normal"
+                              id="contract_id"
+                              {...registerContractForm('contract_id')}
+                              error={!!errorsContract.contract_id}
+                              label="Contrato"
+                              required
+                              autoFocus
+                            />
+                          )}
+                        />
+                        <Typography variant="inherit" color="secondary">
+                          {errorsContract.contract_id?.message}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <Button disabled={isLoading} fullWidth type="submit">
+                          {isLoading ? (
+                            <CircularProgress />
+                          ) : (
+                            <SearchIcon htmlColor="#008000" fontSize="large" />
+                          )}
+                        </Button>
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  </form>
+
+                  <div style={{ height: 400, width: '100%' }}>
+                    <DataGrid rows={rows} columns={columns} pageSize={5} />
+                  </div>
 
                   <div style={{ margin: '10px 0' }}>
                     <Button
@@ -529,12 +572,9 @@ export const Payments: React.FC = () => {
                       type="button"
                       onClick={handleOpenModal}
                     >
-                      Registrar pagamento
+                      Novo Lançamento
                       <AddCircleIcon fontSize="large" htmlColor="green" />
                     </Button>
-                  </div>
-                  <div style={{ height: 400, width: '100%' }}>
-                    <DataGrid rows={rows} columns={columns} pageSize={5} />
                   </div>
                 </Paper>
               </Grid>
@@ -561,7 +601,7 @@ export const Payments: React.FC = () => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <h2 id="transition-modal-title">Registro de pagamento</h2>
+                    <h2 id="transition-modal-title">Novo Lançamento</h2>
                     <Button
                       type="button"
                       style={{
