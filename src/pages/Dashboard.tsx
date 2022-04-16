@@ -9,7 +9,9 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { CircularProgress } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import { isAfter, isBefore, parseISO } from 'date-fns/esm';
+import { addDays, isAfter, isBefore, parseISO } from 'date-fns/esm';
+import { useMessage } from '../hooks/message';
+
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
 import { useAuth } from '../hooks/auth';
@@ -84,6 +86,8 @@ interface IContract {
   start_date: string;
 }
 
+const thirtyDaysAfterToday = addDays(new Date(), 30);
+
 export const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [contracts, setContracts] = useState<IContract[]>([] as IContract[]);
@@ -92,7 +96,9 @@ export const Dashboard: React.FC = () => {
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const preLoadingSuggestedOrders = useCallback(async () => {
+  const { addMessage } = useMessage();
+
+  const preLoadingContracts = useCallback(async () => {
     try {
       const { data } = await api.get(`/api/v1/contracts/`, {
         headers: {
@@ -100,7 +106,18 @@ export const Dashboard: React.FC = () => {
         },
       });
 
-      setContracts(data);
+      const allContracts = data as IContract[];
+
+      const contractsToExpires = allContracts.filter(({ end_date }) =>
+        isBefore(thirtyDaysAfterToday, parseISO(end_date.toString()))
+      );
+
+      addMessage({
+        message: `Há  ${contractsToExpires.length} contratos com menos de 30 dias que estão prestes a vencer`,
+        severity: 'info',
+      });
+
+      setContracts(allContracts);
     } catch (error: any) {
       if (error.response?.status === 401) {
         signOut();
@@ -113,8 +130,8 @@ export const Dashboard: React.FC = () => {
   }, [signOut, user.email]);
 
   useEffect(() => {
-    preLoadingSuggestedOrders();
-  }, [preLoadingSuggestedOrders]);
+    preLoadingContracts();
+  }, [preLoadingContracts]);
 
   return (
     <div className={classes.root}>
@@ -205,6 +222,46 @@ export const Dashboard: React.FC = () => {
 
                               return hasPast;
                             }).length
+                          }
+                        </Typography>
+                      </div>
+                      <div>
+                        <Link className={classes.link} to="/contracts">
+                          <Typography variant="h6" color="primary">
+                            Detalhes
+                          </Typography>
+                        </Link>
+                      </div>
+                    </Grid>
+                  </Paper>
+                </Grid>
+
+                <Grid item>
+                  <Paper className={fixedHeightPaper}>
+                    <Grid
+                      alignItems="center"
+                      alignContent="center"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        height: '100%',
+                      }}
+                    >
+                      <div>
+                        <Typography variant="h6">
+                          Contratos prestes a vencer
+                        </Typography>
+                      </div>
+                      <div>
+                        <Typography variant="h4" className={classes.colorRed}>
+                          {
+                            contracts.filter(({ end_date }) =>
+                              isBefore(
+                                thirtyDaysAfterToday,
+                                parseISO(end_date.toString())
+                              )
+                            ).length
                           }
                         </Typography>
                       </div>
