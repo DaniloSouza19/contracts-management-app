@@ -157,6 +157,14 @@ interface IOwnerOptions {
   name: string;
 }
 
+interface IAddress {
+  street: string;
+  postal_code: string;
+  state: string;
+  city: string;
+  neighborhood: string;
+}
+
 const schemaValidation = Yup.object({
   description: Yup.string().required('Descrição obrigatória'),
   iptu_id: Yup.string().required('IPTU obrigatório'),
@@ -258,10 +266,43 @@ export const Properties: React.FC = () => {
     },
     {
       field: 'measure_amount',
-      headerName: 'Medida',
-      type: 'number',
+      headerName: 'Medida/area',
+      width: 160,
+      editable: false,
+      valueFormatter: ({ row }: GridValueFormatterParams): GridCellValue => {
+        const { measure_amount, measure_type } = row;
+
+        return `${measure_amount} ${measure_type}`;
+      },
+    },
+    {
+      field: 'owner',
+      headerName: 'Proprietário',
       width: 180,
       editable: false,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        const { name } = value as IOwnerOptions;
+
+        return name;
+      },
+    },
+    {
+      field: 'address',
+      headerName: 'Endereço',
+      width: 600,
+      editable: false,
+      renderCell: ({ value }: GridCellParams) => {
+        const { street, city, neighborhood, postal_code, state } =
+          value as IAddress;
+
+        return (
+          <Grid container alignItems="center">
+            <span>
+              {street}, {neighborhood}, {city} - {state} - CEP: {postal_code}
+            </span>
+          </Grid>
+        );
+      },
     },
   ];
 
