@@ -12,6 +12,8 @@ import {
   Modal,
   TextField,
   Divider,
+  Checkbox,
+  FormControlLabel,
 } from '@material-ui/core';
 import {
   DataGrid,
@@ -140,11 +142,13 @@ interface CreatePaymentFormData {
   payment_date?: Date | string | null;
   additional_fees?: number;
   discount?: number;
+  value?: number;
 }
 
 interface IContractOptions {
   id: string;
   description: string;
+  value: number;
 }
 
 interface IContract {
@@ -189,6 +193,7 @@ export const Payments: React.FC = () => {
     payment_id: '',
     payment_name: '',
   });
+  const [isManualPaymentValue, setIsManualPaymentValue] = useState(false);
 
   const [rows, setRows] = useState<IContract[]>([] as IContract[]);
 
@@ -302,6 +307,48 @@ export const Payments: React.FC = () => {
       },
     },
     {
+      field: 'additional_fees',
+      headerName: 'Taxas adicionais',
+      description: 'Número de registro',
+      width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '';
+        }
+
+        return formatValueAsCurrency(Number(value));
+      },
+    },
+    {
+      field: 'discount',
+      headerName: 'Desconto',
+      description: 'Valor de desconto',
+      width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '';
+        }
+
+        return formatValueAsCurrency(Number(value));
+      },
+    },
+    {
+      field: 'subtotal',
+      headerName: 'Subtotal',
+      type: 'string',
+      width: 150,
+      editable: false,
+      renderCell: ({ value }: GridCellParams) => {
+        if (!value) {
+          return '';
+        }
+
+        const formattedSubtotal = formatValueAsCurrency(Number(value));
+
+        return <strong>{formattedSubtotal}</strong>;
+      },
+    },
+    {
       field: 'created_at',
       headerName: 'Data de criação',
       type: 'date',
@@ -366,32 +413,6 @@ export const Payments: React.FC = () => {
         return contract.description;
       },
     },
-    {
-      field: 'additional_fees',
-      headerName: 'Taxas adicionais',
-      description: 'Número de registro',
-      width: 160,
-      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
-        if (!value) {
-          return '';
-        }
-
-        return formatValueAsCurrency(Number(value));
-      },
-    },
-    {
-      field: 'discount',
-      headerName: 'Desconto',
-      description: 'Valor de desconto',
-      width: 160,
-      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
-        if (!value) {
-          return '';
-        }
-
-        return formatValueAsCurrency(Number(value));
-      },
-    },
   ];
 
   const loadingPayments = useCallback(
@@ -449,14 +470,26 @@ export const Payments: React.FC = () => {
       additional_fees,
       payment_date,
       discount,
+      value,
     }: CreatePaymentFormData) => {
       try {
         setIsLoading(true);
 
-        const bodyData = { description, due_date, additional_fees, discount };
+        console.log(value);
+
+        const bodyData = {
+          description,
+          due_date,
+          additional_fees,
+          discount,
+        };
 
         if (payment_date) {
           Object.assign(bodyData, { ...bodyData, payment_date });
+        }
+
+        if (value) {
+          Object.assign(bodyData, { ...bodyData, value });
         }
 
         await api.post(`/api/v1/contracts/${contract_id}/payments`, bodyData, {
@@ -522,6 +555,7 @@ export const Payments: React.FC = () => {
           return {
             id: contract.id,
             description: contract.description.toLowerCase(),
+            value: contract.value,
           };
         });
 
@@ -739,7 +773,7 @@ export const Payments: React.FC = () => {
                     <Typography variant="inherit" color="primary">
                       Taxas e desconto
                     </Typography>
-                    <Divider title="feesAndDiscount" />
+                    <Divider title="registryOffice" />
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <TextField
@@ -764,7 +798,7 @@ export const Payments: React.FC = () => {
                           fullWidth
                           variant="outlined"
                           margin="normal"
-                          id="registration_id"
+                          id="discount"
                           {...register('discount')}
                           error={!!errors.discount}
                           label="Valor de desconto"
@@ -778,6 +812,42 @@ export const Payments: React.FC = () => {
                         </Typography>
                       </Grid>
                     </Grid>
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isManualPaymentValue}
+                          onChange={(e) =>
+                            setIsManualPaymentValue(!isManualPaymentValue)
+                          }
+                          name="isManualPaymentValue"
+                          color="primary"
+                        />
+                      }
+                      label="Definir valor diferente do contrato"
+                      style={{ display: 'block' }}
+                    />
+
+                    {isManualPaymentValue && (
+                      <Grid>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="normal"
+                          id="value"
+                          {...register('value')}
+                          error={!!errors.value}
+                          label="Valor"
+                          autoFocus
+                          type="number"
+                          defaultValue={contractSelected?.value || 0}
+                        />
+
+                        <Typography variant="inherit" color="secondary">
+                          {errors.value}
+                        </Typography>
+                      </Grid>
+                    )}
 
                     <Typography variant="inherit" color="primary">
                       Contrato
