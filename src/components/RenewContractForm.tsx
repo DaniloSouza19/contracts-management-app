@@ -172,7 +172,11 @@ export const RenewContractForm: React.FC<RenewContractFormProps> = ({
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Pagar'}
+          {isLoading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            'Renovar'
+          )}
         </Button>
       </form>
     </Container>
