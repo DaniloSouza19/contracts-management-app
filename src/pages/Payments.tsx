@@ -547,6 +547,9 @@ export const Payments: React.FC = () => {
         headers: {
           Authorization: getToken(),
         },
+        params: {
+          onlyActive: true,
+        },
       })
       .then((response) => {
         const contracts = response.data.map((contract: IContractOptions) => {
