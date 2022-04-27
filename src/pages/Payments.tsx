@@ -475,8 +475,6 @@ export const Payments: React.FC = () => {
       try {
         setIsLoading(true);
 
-        console.log(value);
-
         const bodyData = {
           description,
           due_date,
@@ -488,7 +486,7 @@ export const Payments: React.FC = () => {
           Object.assign(bodyData, { ...bodyData, payment_date });
         }
 
-        if (value) {
+        if (value && isManualPaymentValue) {
           Object.assign(bodyData, { ...bodyData, value });
         }
 
@@ -522,7 +520,7 @@ export const Payments: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [handleCloseModal]
+    [handleCloseModal, isManualPaymentValue]
   );
 
   const onSubmitSearchContracts = useCallback(
@@ -780,7 +778,7 @@ export const Payments: React.FC = () => {
                           fullWidth
                           variant="outlined"
                           margin="normal"
-                          id="registry_office"
+                          id="additional_fees"
                           {...register('additional_fees')}
                           error={!!errors.additional_fees}
                           label="Taxa adicional"
