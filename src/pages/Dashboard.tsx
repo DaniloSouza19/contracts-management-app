@@ -112,10 +112,12 @@ export const Dashboard: React.FC = () => {
         isBefore(thirtyDaysAfterToday, parseISO(end_date.toString()))
       );
 
-      addMessage({
-        message: `Há  ${contractsToExpires.length} contratos com menos de 30 dias que estão prestes a vencer`,
-        severity: 'info',
-      });
+      if (contractsToExpires.length > 0) {
+        addMessage({
+          message: `Há  ${contractsToExpires.length} contratos com menos de 30 dias que estão prestes a vencer`,
+          severity: 'info',
+        });
+      }
 
       setContracts(allContracts);
     } catch (error: any) {
