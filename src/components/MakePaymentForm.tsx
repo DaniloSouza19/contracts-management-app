@@ -81,7 +81,8 @@ export const MakePaymentForm: React.FC<MakePaymentProps> = ({
           signOut();
         } else {
           addMessage({
-            message: 'Verifique os dados e tente novamente',
+            message:
+              'Verifique o data de pagamento - Não deve ser uma data que ainda não passou!',
             severity: 'error',
           });
         }
