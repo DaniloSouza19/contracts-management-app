@@ -9,7 +9,6 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { CircularProgress } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import { addDays, isAfter, isBefore, parseISO } from 'date-fns/esm';
 import { useMessage } from '../hooks/message';
 
 import Copyright from '../components/copyright';
@@ -84,15 +83,26 @@ interface IContract {
   price: string;
   end_date: string;
   start_date: string;
+  expiresInDays: number;
+  isActive: boolean;
 }
 
-const thirtyDaysAfterToday = addDays(new Date(), 30);
+interface IContractAnalysis {
+  contractsToExpires: number;
+  activeContracts: number;
+  inactiveContracts: number;
+}
 
 export const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [contracts, setContracts] = useState<IContract[]>([] as IContract[]);
   const { user, signOut } = useAuth();
   const [pageIsLoading, setPageIsLoading] = useState(true);
+  const [contractAnalysis, setContractAnalysis] = useState<IContractAnalysis>({
+    activeContracts: 0,
+    contractsToExpires: 0,
+    inactiveContracts: 0,
+  });
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -108,18 +118,24 @@ export const Dashboard: React.FC = () => {
 
       const allContracts = data as IContract[];
 
-      const contractsToExpires = allContracts.filter(({ end_date }) =>
-        isBefore(thirtyDaysAfterToday, parseISO(end_date.toString()))
-      );
+      const activeContracts =
+        allContracts.filter((contract) => contract.isActive).length || 0;
 
-      if (contractsToExpires.length > 0) {
-        addMessage({
-          message: `Há  ${contractsToExpires.length} contratos com menos de 30 dias que estão prestes a vencer`,
-          severity: 'info',
-        });
-      }
+      const inactiveContracts =
+        allContracts.filter((contract) => !contract.isActive).length || 0;
+
+      const contractsToExpires =
+        allContracts.filter(
+          (contract) =>
+            contract.expiresInDays < 30 && contract.expiresInDays >= 0
+        ).length || 0;
 
       setContracts(allContracts);
+      setContractAnalysis({
+        activeContracts,
+        inactiveContracts,
+        contractsToExpires,
+      });
     } catch (error: any) {
       if (error.response?.status === 401) {
         signOut();
@@ -134,6 +150,15 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     preLoadingContracts();
   }, [preLoadingContracts]);
+
+  useEffect(() => {
+    if (contractAnalysis.contractsToExpires > 0) {
+      addMessage({
+        message: `Há  ${contractAnalysis.contractsToExpires} contratos com menos de 30 dias que estão prestes a vencer`,
+        severity: 'info',
+      });
+    }
+  }, [contractAnalysis.contractsToExpires]);
 
   return (
     <div className={classes.root}>
@@ -178,15 +203,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <div>
                         <Typography variant="h4">
-                          {
-                            contracts.filter((contract) => {
-                              const end_date = parseISO(contract.end_date);
-
-                              const hasPast = isAfter(end_date, new Date());
-
-                              return hasPast;
-                            }).length
-                          }
+                          {contractAnalysis.activeContracts}
                         </Typography>
                       </div>
                       <div>
@@ -216,15 +233,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <div>
                         <Typography variant="h4" className={classes.colorRed}>
-                          {
-                            contracts.filter((contract) => {
-                              const end_date = parseISO(contract.end_date);
-
-                              const hasPast = isBefore(end_date, new Date());
-
-                              return hasPast;
-                            }).length
-                          }
+                          {contractAnalysis.inactiveContracts}
                         </Typography>
                       </div>
                       <div>
@@ -257,14 +266,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <div>
                         <Typography variant="h4" className={classes.colorRed}>
-                          {
-                            contracts.filter(({ end_date }) =>
-                              isBefore(
-                                thirtyDaysAfterToday,
-                                parseISO(end_date.toString())
-                              )
-                            ).length
-                          }
+                          {contractAnalysis.contractsToExpires}
                         </Typography>
                       </div>
                       <div>
