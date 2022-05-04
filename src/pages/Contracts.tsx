@@ -227,7 +227,7 @@ export const Contracts: React.FC = () => {
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 150, hide: true },
     {
-      field: 'active',
+      field: 'isActive',
       headerName: 'Status',
       width: 120,
       editable: false,
@@ -320,7 +320,7 @@ export const Contracts: React.FC = () => {
       field: 'start_date',
       headerName: 'Data inicio',
       type: 'date',
-      width: 180,
+      width: 150,
       editable: false,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         if (!value) {
@@ -338,7 +338,7 @@ export const Contracts: React.FC = () => {
       field: 'end_date',
       headerName: 'Data fim',
       type: 'date',
-      width: 180,
+      width: 150,
       editable: false,
       valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
         if (!value) {
@@ -350,6 +350,26 @@ export const Contracts: React.FC = () => {
         const formattedDate = format(dateParsed, 'd/MM/yyyy');
 
         return formattedDate;
+      },
+    },
+    {
+      field: 'expiresInDays',
+      headerName: 'Finaliza em',
+      width: 160,
+      valueFormatter: ({ value }: GridValueFormatterParams): GridCellValue => {
+        if (!value) {
+          return '0 dias';
+        }
+
+        if (value < 0) {
+          const days = Number(value) * -1;
+
+          return value === -1
+            ? `Vencido a ${days} dia`
+            : `Vencido a ${days} dias`;
+        }
+
+        return value > 1 ? `${value} dias` : `${value} dia`;
       },
     },
     {
@@ -398,20 +418,7 @@ export const Contracts: React.FC = () => {
         },
       });
 
-      const contracts = response.data.map((contract: IContract) => {
-        const end_date = contract.end_date as string;
-
-        const endDateParsedISO = parseISO(end_date);
-
-        const today = new Date();
-
-        const contractsIsInactive = isBefore(endDateParsedISO, today);
-
-        return {
-          ...contract,
-          active: !contractsIsInactive,
-        };
-      });
+      const contracts = response.data;
 
       setRows(contracts);
     } catch (error: any) {
