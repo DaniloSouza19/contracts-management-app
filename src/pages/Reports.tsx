@@ -10,6 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import { CircularProgress } from '@material-ui/core';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
+import TabsReports from '../components/TabsReports';
 
 const drawerWidth = 240;
 
@@ -84,11 +85,12 @@ export const Reports: React.FC = () => {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <MenuHeader title="Dashboard" />
+      <MenuHeader title="Relatórios" />
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={2}>
+            <TabsReports />
             {pageIsLoading ? (
               <CircularProgress
                 color="primary"
