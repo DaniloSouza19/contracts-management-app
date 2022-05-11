@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthProvider } from './auth';
-import { MessageProvider } from './Message';
+import { MessageProvider } from './message';
 
 export const AppProvider: React.FC = ({ children }) => {
   return (

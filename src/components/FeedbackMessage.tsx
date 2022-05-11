@@ -1,21 +1,18 @@
 import React from 'react';
-import { Snackbar, Stack, AlertColor } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+
+function Alert(props: AlertProps) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 interface FeedBackMessageProps {
   message: string;
-  severity: AlertColor;
+  severity: 'success' | 'info' | 'error';
   isOpen: boolean;
   autoHideDuration?: number | null;
   handleClose(event?: React.SyntheticEvent | Event, reason?: string): void;
 }
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
 
 export const FeedbackMessage: React.FC<FeedBackMessageProps> = ({
   message,
@@ -25,16 +22,16 @@ export const FeedbackMessage: React.FC<FeedBackMessageProps> = ({
   handleClose,
 }) => {
   return (
-    <Stack spacing={2} sx={{ width: '100%' }}>
-      <Snackbar
-        open={isOpen}
-        autoHideDuration={autoHideDuration}
-        onClose={handleClose}
-      >
-        <Alert severity={severity} sx={{ width: '100%' }} onClose={handleClose}>
-          {message}
-        </Alert>
-      </Snackbar>
-    </Stack>
+    // <Stack spacing={2} sx={{ width: '100%' }}>
+    <Snackbar
+      open={isOpen}
+      autoHideDuration={autoHideDuration}
+      onClose={handleClose}
+    >
+      <Alert severity={severity} onClose={handleClose}>
+        {message}
+      </Alert>
+    </Snackbar>
+    // </Stack>
   );
 };
