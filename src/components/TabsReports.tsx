@@ -5,6 +5,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import { PropertiesReport } from './PropertiesReport';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,18 +61,15 @@ export default function TabsReports() {
   return (
     <div className={classes.root}>
       <AppBar position="static">
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          aria-label="simple tabs example"
-        >
+        <Tabs value={value} onChange={handleChange} aria-label="report tabs">
           <Tab label="Relatório de imóveis" {...a11yProps(0)} />
-          <Tab label="Lançamentos não pagos" {...a11yProps(1)} />
-          <Tab label="Lançamentos pagos no mês" {...a11yProps(2)} />
+          <Tab label="Lançamentos não pagos (mês)" {...a11yProps(1)} />
+          <Tab label="Lançamentos pagos (mês)" {...a11yProps(2)} />
+          <Tab label="Contratos proximo a vencer" {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
-        Item One
+        <PropertiesReport />
       </TabPanel>
       <TabPanel value={value} index={1}>
         Item Two
