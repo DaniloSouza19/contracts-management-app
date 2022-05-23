@@ -63,19 +63,22 @@ export default function TabsReports() {
       <AppBar position="static">
         <Tabs value={value} onChange={handleChange} aria-label="report tabs">
           <Tab label="Relatório de imóveis" {...a11yProps(0)} />
-          <Tab label="Lançamentos não pagos (mês)" {...a11yProps(1)} />
-          <Tab label="Lançamentos pagos (mês)" {...a11yProps(2)} />
-          <Tab label="Contratos proximo a vencer" {...a11yProps(2)} />
+          <Tab label="Lançamentos não pagos" {...a11yProps(1)} />
+          <Tab label="Lançamentos pagos" {...a11yProps(2)} />
+          <Tab label="Contratos à vencer" {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
         <PropertiesReport />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Item Two
+        Relatorio Lançamentos não pagos
       </TabPanel>
       <TabPanel value={value} index={2}>
-        Item Three
+        Relatorio Lançamentos pagos
+      </TabPanel>
+      <TabPanel value={value} index={3}>
+        Relatorio Contratos à vencer
       </TabPanel>
     </div>
   );
