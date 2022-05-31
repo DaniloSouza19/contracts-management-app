@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import { CircularProgress } from '@material-ui/core';
 import Copyright from '../components/copyright';
 import MenuHeader from '../components/menuHeader';
@@ -76,8 +73,6 @@ export const Reports: React.FC = () => {
   const classes = useStyles();
   const [pageIsLoading, setPageIsLoading] = useState(true);
 
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-
   useEffect(() => {
     setPageIsLoading(false);
   }, []);
@@ -90,7 +85,6 @@ export const Reports: React.FC = () => {
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={2}>
-            <TabsReports />
             {pageIsLoading ? (
               <CircularProgress
                 color="primary"
@@ -98,12 +92,7 @@ export const Reports: React.FC = () => {
                 className={classes.center}
               />
             ) : (
-              <Grid item xs={8} md={8} lg={7}>
-                <Paper className={fixedHeightPaper}>
-                  {' '}
-                  <Typography variant="h6">Relatórios</Typography>
-                </Paper>
-              </Grid>
+              <TabsReports />
             )}
           </Grid>
           <Box pt={4}>
