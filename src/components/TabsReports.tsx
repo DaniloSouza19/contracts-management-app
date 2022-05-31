@@ -6,6 +6,7 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { PropertiesReport } from './PropertiesReport';
+import { PaymentsReport } from './PaymentsReport';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,10 +73,10 @@ export default function TabsReports() {
         <PropertiesReport />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Relatorio Lançamentos não pagos
+        <PaymentsReport title="Relatório de lançamentos não pagos" />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        Relatorio Lançamentos pagos
+        <PaymentsReport title="Relatório de lançamentos pagos" onlyPay />
       </TabPanel>
       <TabPanel value={value} index={3}>
         Relatorio Contratos à vencer
