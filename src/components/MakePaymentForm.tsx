@@ -14,6 +14,7 @@ import { useMessage } from '../hooks/message';
 import { api } from '../services/api';
 import { getToken } from '../utils/localStorageUtils';
 import { useAuth } from '../hooks/auth';
+import { formatStringDate } from '../utils/formatter';
 
 interface MakePaymentProps {
   payment_id: string;
@@ -93,6 +94,12 @@ export const MakePaymentForm: React.FC<MakePaymentProps> = ({
     [onSubmitForm]
   );
 
+  const getTodayDate = useCallback(() => {
+    const today = new Date().toISOString();
+
+    return formatStringDate(today, 'yyyy-MM-dd');
+  }, []);
+
   return (
     <Container>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -107,6 +114,7 @@ export const MakePaymentForm: React.FC<MakePaymentProps> = ({
               variant="outlined"
               margin="normal"
               id="payment_date"
+              defaultValue={getTodayDate()}
               {...register('payment_date')}
               error={!!errors.payment_date}
               label="Data de pagamento"
